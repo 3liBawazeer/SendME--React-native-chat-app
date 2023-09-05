@@ -3,6 +3,7 @@ import React , {useEffect,useState,useContext,createContext} from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import {useNavigation} from "@react-navigation/native"
 
+
 const authContext = createContext({})
 
 const Auth_Context = ({children}) => {
@@ -14,10 +15,8 @@ const Auth_Context = ({children}) => {
       const [userData, setUserData] = useState(null)
       const [Token, setToken] = useState(null)
 
-    useEffect(() => {
-        checkUser()
-    }, [])
     
+  
     const checkUser = async () => { 
         const user = await AsyncStorage.getItem("user");
         const token = await AsyncStorage.getItem("token");
@@ -34,10 +33,11 @@ const Auth_Context = ({children}) => {
      const logout = async () => { 
          await AsyncStorage.removeItem("user");
          await AsyncStorage.removeItem("token");
-        setisLoggedIn(false);
       }
 
     const saveloggedIn = async (data) => { 
+
+      
      if (data.res.user && data.res.token) {
         setUserData(data.res.user)
         await AsyncStorage.setItem("token",data.res.token).then(()=>{
@@ -50,12 +50,12 @@ const Auth_Context = ({children}) => {
 
         }).catch((err)=>console.log(err))
      }else{
-        console.log("token = ",data.res.token,"user = ",data.res.user);
+        console.log("خطاْ أثنا حفظ الداتا");
      }
     }
 
   return (
-    <authContext.Provider value={{isLoggedIn,setisLoggedIn,saveloggedIn,userData,setUserData,checkUser,logout,Token,ChatsandMessagesData,setChatsandMessagesData}}>
+    <authContext.Provider value={{isLoggedIn,setisLoggedIn,saveloggedIn,userData,setUserData,checkUser,logout,Token,setToken,ChatsandMessagesData,setChatsandMessagesData}}>
        {children}
     </authContext.Provider>
   )

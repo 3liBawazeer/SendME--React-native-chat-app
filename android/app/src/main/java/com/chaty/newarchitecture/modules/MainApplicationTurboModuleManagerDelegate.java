@@ -1,4 +1,4 @@
-package com.chaty.newarchitecture.modules;
+package com.sendMe.newarchitecture.modules;
 
 import com.facebook.jni.HybridData;
 import com.facebook.react.ReactPackage;

@@ -1,4 +1,4 @@
-package com.chaty.newarchitecture;
+package com.sendMe.newarchitecture;
 
 import android.app.Application;
 import androidx.annotation.NonNull;
@@ -19,9 +19,9 @@ import com.facebook.react.fabric.CoreComponentsRegistry;
 import com.facebook.react.fabric.EmptyReactNativeConfig;
 import com.facebook.react.fabric.FabricJSIModuleProvider;
 import com.facebook.react.uimanager.ViewManagerRegistry;
-import com.chaty.BuildConfig;
-import com.chaty.newarchitecture.components.MainComponentsRegistry;
-import com.chaty.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
+import com.sendMe.BuildConfig;
+import com.sendMe.newarchitecture.components.MainComponentsRegistry;
+import com.sendMe.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { StyleSheet, Text, View,TextInput } from 'react-native'
 import { Icon } from '@rneui/themed'
 
@@ -11,6 +11,7 @@ const Input = ({
     icc1,
     ics1,
     ict1,
+    shc,
     icn1,
     icc2,
     ics2,
@@ -37,15 +38,43 @@ const Input = ({
     btlr,
     e,
     bw,
-    onPressic1
+    onPressic1,
+    onPressic2,
+    bc,
+    autoFocus,
+    onFocus,
+    onBlur,
+    ref,
+    onPressOut,
+    onPressIn,
+    focusAndBlur,
+    ph=10,
+    mh
+    
 }) => {
+
+    let focusINputRef = useRef()
+
+    useEffect(() => {
+        if (focusAndBlur) {
+            focusINputRef.current.focus()
+        }else{
+            focusINputRef.current.blur()
+        }
+     
+    }, [focusAndBlur])
+    
+
+
     return (
-        <View style={{
+        <View 
+        style={{
             flexDirection:"row",
             alignItems:"center",
             backgroundColor:bg,
             borderWidth:bw,
             borderRadius:br,
+            borderColor:bc,
             borderBottomWidth:bbw,
             borderBottomColor:bbc,
             borderBottomLeftRadius:bblr,
@@ -53,6 +82,9 @@ const Input = ({
             borderTopRightRadius:btrr,
             borderTopLeftRadius:btlr,
             elevation:e,
+            shadowColor:shc,
+            marginHorizontal:mh
+            
             }}>
 
               { ic1 && <View style={{width:"10%"}}>
@@ -61,27 +93,34 @@ const Input = ({
 
             <View style={{width: !ic2&&!ic1? '100%' : ic1  ?'80%':'90%',height:multH}}>
               <TextInput 
-              keyboardType={keyboardType}
-              placeholder={placeholder}
-              placeholderTextColor={placeHoldColor}
-              onChangeText={onChangeText}
-              value={value}
-              secureTextEntry={password}
-              multiline={mult}
-              style={{
+                onPressIn={onPressIn}
+                onPressOut={onPressOut}
+                keyboardType={keyboardType}
+                placeholder={placeholder}
+                placeholderTextColor={placeHoldColor}
+                autoFocus={autoFocus}
+                onFocus={onFocus}
+                onChangeText={onChangeText}
+                value={value}
+                ref={focusINputRef}
+                onBlur={onBlur}
+                secureTextEntry={password}
+                multiline={mult}
+                style={{
                   fontSize:fs,
                   fontFamily:'NotoKufiArabic-Medium',
                   fontWeight:fw,
                   color:fc,
-                  paddingHorizontal:10,
-                  textAlign:ta
+                  paddingHorizontal:ph,
+                  textAlign:ta,
+                //   paddingHorizontal
               }}
               editable={editable}
               />
             </View>
 
             { ic2 && <View style={{width:"10%"}}>
-            <Icon name={icn2} type={ict2}  color={icc2} size={ics2} />
+            <Icon name={icn2} type={ict2}  color={icc2} size={ics2} onPress={onPressic2} style={{padding:5}} containerStyle={{borderRadius:50}} />
             </View>}
 
         </View>

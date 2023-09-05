@@ -1,98 +1,274 @@
-import {Pressable, StyleSheet, View} from 'react-native';
-import React, {useEffect,useRef,useState} from 'react';
+import {Alert, FlatList, Image, TouchableOpacity, Pressable,StyleSheet, View ,Dimensions,Animated} from 'react-native';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import Header from '../../components/Header';
-import { Tab, Text, TabView } from '@rneui/themed';
+import {Tab, Text, Icon, Button} from '@rneui/themed';
 import {useAuth} from '../../Contexts/Auth_Context';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import  Icon  from 'react-native-vector-icons/FontAwesome';
 import HomeView from './HomeView';
-import FriendsRequists from './FriendsRequists';
-import FriendsList from './FriendsList';
-import { socketIo, useSocket } from '../../Contexts/Socket_context';
+// import BottomSheet from 'react-native-gesture-bottom-sheet';
+import {socketIo, useSocket} from '../../Contexts/Socket_context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { db, useLocalDataBase } from '../../Contexts/LocalDataBase';
+import {db, useLocalDataBase} from '../../Contexts/LocalDataBase';
+import {useFocusEffect} from '@react-navigation/native';
+import LinearGradient from 'react-native-linear-gradient';
+import {Avatar} from '@rneui/base';
+import RBSheet from "react-native-raw-bottom-sheet";
+import {StatusBar} from 'react-native';
 
+const {height, width} = Dimensions.get('window');
 
 const Home = ({navigation}) => {
+  const {
+    LastChats,
+    setAllMessages,
+    AllMessages,
+    MessagesNotRead,
+    getMessagesNotRead,
+    contactsLive
+  } = useLocalDataBase();
+  const {OnlineUsers} = useSocket();
 
-const {LastChats,setAllMessages,AllMessages} = useLocalDataBase()
-const {userData, logout} = useAuth();
-const [index, setIndex] = React.useState(0);
-  
+  const {userData, logout} = useAuth();
+  const refRBSheet = useRef();
 
+  useFocusEffect(
+    useCallback(() => {
+      console.log(MessagesNotRead);
+    }, []),
+  );
+  const STATUSBAR_HEIGHT = StatusBar.currentHeight;
+
+  const [shadowBackGround, setshadowBackGround] = useState(new Animated.Value(0))
+
+  const [backBlack, setbackBlack] = useState(false)
+  const bottomSheetData = [
+    {name: 'settings', type: 'feather', title: 'الإعدادات',onPress:()=>{
+      refRBSheet.current.close()
+      setbackBlack(false);navigation.navigate("SettingHome")
+    }},
+    // {name:'person',type:'fontisto',title:"الملف الشخصي"},
+    // {name:'person',type:'fontisto',title:"الملف الشخصي"},
+  ];
 
 
 
   return (
-    <View style={styles.body}>
-      <Header
-      title='CHATY'
-      icn1='more-vertical'
-      ict1='feather'
-      bg={"#08d"}
-      fc={"#fff"}
-      onPressIc1={()=>{  db.transaction((tx)=>{
-        tx.executeSql(
-            "DELETE FROM last_chats",
-            [],
-            (tx,res)=>{
-              resolve("DELTET MESSAGE SUCCEFULY >>>")
-             },
-             (err)=> reject(err),
-         )
-        })
-}}
-      />
+    <>
 
-<>
-    <Tab
-      value={index}
-      onChange={(e) => {setIndex(e);console.log(e);}}
-      indicatorStyle={{
-        backgroundColor: 'white',
-        height: 2,
-      }}
-      variant="default"
-      
-    >
-      <Tab.Item
-        title="الصفحة الرئيسية"
-        titleStyle={{ fontSize: 14 ,color:index == 0 ? "#fff":"#333"}}
-      />
-      <Tab.Item
-        title="طلبات الصداقه"
-        titleStyle={{ fontSize: 14 ,color:index == 1 ? "#fff":"#333"}}
-      />
-      <Tab.Item
-        title="الأصدقاء"
-        titleStyle={{ fontSize: 14 , color:index == 2 ? "#fff":"#333"}}
-        // icon={{ name: 'cart', type: 'ionicon', color: 'white' }}
-      />
-    </Tab>
+      <View style={styles.body}>
+        <View style={{flex: 1}}>
+          <LinearGradient
+            colors={['#5B70F7', '#7F8CE9']}
+            start={{x: 0, y: 0}}
+            end={{x: 1, y: 0}}
+            style={{flex: 1, paddingTop: STATUSBAR_HEIGHT}}>
+            <StatusBar translucent={true} backgroundColor={'transparent'} />
 
-    <TabView value={index} onChange={setIndex} animationType="spring">
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginHorizontal: 5,
+              }}>
+              <Icon
+                onPress={() => {
+                  navigation.navigate('friendsList');
+                }}
+                name="adduser"
+                type="ant-design"
+                containerStyle={{
+                  borderRadius: 15,
+                  marginTop: 10,
+                  marginHorizontal: 5,
+                }}
+                color="#fff"
+                style={{backgroundColor: '#fff2', padding: 7}}
+              />
 
-      <TabView.Item style={{ backgroundColor: '#fff', width: '100%' }}>
+              <View
+                style={{
+                  marginTop: 10,
+                  marginHorizontal: 10,
+                  flexDirection: 'row-reverse',
+                  alignItems: 'center',
+                }}>
+                <Image
+                  source={require('../../assets/images/sendMe_fff.png')}
+                  style={{width: 30, height: 45}}
+                />
+                <Text style={{fontSize: 25, fontWeight: '700', color: '#fff'}}>
+                  END
+                  <Text
+                    style={{fontSize: 25, fontWeight: '900', color: '#08d'}}>
+                    ME
+                  </Text>
+                </Text>
+              </View>
 
-        <HomeView navigation={navigation} userData={userData} LastChats={LastChats} setAllMessages={setAllMessages} AllMessages={AllMessages}  />
+              <View style={{flexDirection: 'row'}}>
+                {/* <Icon onPress={()=>{navigation.navigate('friendsList')}} name='search' type="feather" containerStyle={{borderRadius:15,marginTop:10,marginHorizontal:5}} color="#fff" style={{backgroundColor:"#fff2",padding:7,}} /> */}
+                <Icon
+                  onPress={() => {
+                    refRBSheet.current.open();
+                  }}
+                  name="menu"
+                  type="feather"
+                  containerStyle={{
+                    borderRadius: 15,
+                    marginTop: 10,
+                    marginHorizontal: 5,
+                  }}
+                  color="#fff"
+                  style={{backgroundColor: '#fff2', padding: 7}}
+                />
+              </View>
+            </View>
 
-      </TabView.Item>
+            {/* <View style={{height:1,backgroundColor:"#fff5",margin:10,borderRadius:50,elevation:1,shadowColor:"#fff"}} ></View> */}
 
-      <TabView.Item style={{ backgroundColor: '#fff', width: '100%' }}>
+            {/* <View style={{marginBottom:10,marginHorizontal:5,flexDirection:"row"}}>
+              <Avatar
+                      size={55}
+                      rounded
+                      icon={{ name: 'plus', type: 'ant-design' }}
+                      containerStyle={{ borderStyle:"dashed",borderWidth:2,borderColor:"#fff",backgroundColor:"#974ECF" ,margin:5}}
+                      // source={require("../../assets/images/defult.png")}
+                    />
+                <FlatList
+                 data={[]}
+                 horizontal
+                 showsHorizontalScrollIndicator={false}
+                 renderItem={({item,index})=>(
+                  <>
+                   <View>
+                   <Avatar
+                   key={index}
+                    size={55}
+                    rounded
+                    // icon={{ name: 'plus', type: 'ant-design' }}
+                    // overlayContainerStyle={{backgroundColor:"#fff",margin:0,}}
+                    containerStyle={{ borderStyle:"solid",borderWidth:2,borderColor:"#fff0",backgroundColor:"#fff" ,margin:5,padding:4,elevation:5,shadowColor:"#fff"}}
+                    source={require("../../assets/images/defult.png")}
+                  />
+                   </View>
+                  </>
+                 )}
+                 keyExtractor={(_,x)=>x.toString()}
+                />
+             </View> */}
 
-        <FriendsRequists/>
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: '#fff',
+                borderTopRightRadius: 20,
+                borderTopLeftRadius: 20,
+                marginTop: 10,
+              }}>
+              <HomeView
+                OnlineUsers={OnlineUsers}
+                getMessagesNotRead={getMessagesNotRead}
+                MessagesNotRead={MessagesNotRead}
+                navigation={navigation}
+                userData={userData}
+                LastChats={LastChats}
+                setAllMessages={setAllMessages}
+                AllMessages={AllMessages}
+              />
+            </View>
+          </LinearGradient>
+        </View>
+      </View>
 
-      </TabView.Item>
+    {backBlack && <Animated.View style={{backgroundColor:`#000`,position:"absolute",height,width,zIndex:10,opacity:shadowBackGround}} ></Animated.View> }
 
-      <TabView.Item style={{ backgroundColor: '#fff', width: '100%' }}>
 
-        <FriendsList navigation={navigation} userData={userData} />
+       <RBSheet
+        ref={refRBSheet}
+        height={100}
+        onOpen={()=>{
+          setbackBlack(true)
+          Animated.timing(shadowBackGround,{
+            toValue:0.4,
+            duration:300,
+            useNativeDriver:true,
+          }).start()
+        }}
+        onClose={()=>{
+          Animated.timing(shadowBackGround,{
+            toValue:0,
+            duration:300,
+            useNativeDriver:true,
+          }).start()
+          setTimeout(() => {
+            setbackBlack(false)
+          }, 400);
+        }}
+        closeOnDragDown={true}
+        closeOnPressMask={false}
+        animationType="slide"
+        customStyles={{
+          wrapper: {
+            backgroundColor: "#0000",
+          },
+          draggableIcon: {
+            backgroundColor: "#aaa",
+          },
+          container:{
+            elevation:15,
+            shadowColor:"#000",
+            borderTopRightRadius:20,
+            borderTopLeftRadius:20,
+          }
+        }}
+        
+      >
+        <FlatList
+          data={bottomSheetData}
+          renderItem={({item, index}) => (
+            <>
+              
+                <TouchableOpacity
+                onPress={item.onPress}
+                  style={{
+                    borderBottomColor: '#ddd',
+                    borderBottomWidth:bottomSheetData.length - 1 == index ?1:1,
+                    marginHorizontal: 0,
+                    flex: 1,
+                    justifyContent:'center'
+                  }}>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      padding: 12,
+                      justifyContent: 'flex-start',
+                      alignItems: 'center',
+                    }}>
+                    <Icon
+                      name={item.name}
+                      size={25}
+                      type={item.type}
+                      color={'#80d5'}
+                      style={{paddingHorizontal: 10}}
+                    />
+                    <Text
+                      style={{
+                        paddingHorizontal: 10,
+                        color: '#333',
+                        fontSize: 18,
+                      }}>
+                      {item.title}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
 
-      </TabView.Item>
-
-    </TabView>
-  </>
-    </View>
+            
+            </>
+          )}
+        />
+        
+      </RBSheet>
+    </>
   );
 };
 
