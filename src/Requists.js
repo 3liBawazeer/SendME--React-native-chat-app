@@ -1,4 +1,4 @@
-export const BACK_END_URL = "http://192.168.1.109:5001";
+export const BACK_END_URL = "http://192.168.1.102:5001";
 import axios from "axios";
 
     export const signUp = (data) => { 
@@ -19,9 +19,9 @@ import axios from "axios";
     return fun;
     }
 
-    export const getAllUsers = (token) => { 
+    export const getMyContactsInSendMe = (token,data) => { 
         const fun = new Promise((resolve,rej)=>{
-            axios.get(BACK_END_URL + "/persons/all-users",{
+            axios.post(BACK_END_URL + "/persons/all-users",{contact:data},{
                 headers: {
                     'auth_token_jwt': token ,
                     'Accept' : 'application/json',

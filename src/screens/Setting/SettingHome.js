@@ -221,7 +221,7 @@ const SettingHome = ({navigation}) => {
           }}>
           <Image
             source={
-              userData.image == 'image-user.png'
+              userData.image == 'image-user.png' || userData.image == ""
                 ? require('../../assets/images/user-image.png')
                 : {uri: userData.image}
             }

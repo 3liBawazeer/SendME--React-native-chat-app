@@ -23,6 +23,7 @@ import {useCalling} from '../../Contexts/Call_Context';
 import notifee, {AndroidImportance} from '@notifee/react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {formatDate, GetDateLastMessages} from '../../components/getTimeAr';
+import { colors } from '../../assets/colors';
 
 const ChatScreen = ({route, navigation}) => {
   const {item, newfriendData, checkChat} = route?.params;
@@ -49,8 +50,6 @@ const ChatScreen = ({route, navigation}) => {
   const [OnceSaveCHat, setOnceSaveCHat] = useState(0);
 
   const checkChatsAndAdd = () => {
-    // console.log(userData,":::::userDAta");
-    // console.log(Token,":::::token");
     const data = {
       myId: userData._id,
       friendId: newfriendData?._id,
@@ -62,30 +61,28 @@ const ChatScreen = ({route, navigation}) => {
         // console.log(chat,"[ <==== chat  ] ");
         const friend = chat.users.find(ite => ite !== userData?._id);
         setfriendId(friend);
-        // console.log(friend,"<===== this is friend id bddddddddddddddd ...");
-        // console.log(chat._id,"<===== this is chat id between you and your freind ...");
         setchatId(chat._id);
       })
-      .catch(err => console.log(err));
+      .catch(err => console.log(err))
+      .finally(()=>{
+        setChatLoading(false);
+      })
   };
 
   useEffect(() => {
     if (chatId) {
       socketIo.emit('joinToChat', chatId);
-
       checkIsRead(chatId);
       getMessagesNotRead();
-
+      const mesg = AllMessages.filter(item => item.chat == chatId);
+      setmessages(mesg);
       return () => {
-        // checkIsRead(chatId);
-        console.log('leave from chat ');
         socketIo.emit('leaveFromChat', chatId);
       };
     }
   }, [chatId]);
 
   useEffect(() => {
-    console.log(item);
     const clear = setTimeout(() => {
       if (checkChat) {
         setChatLoading(true);
@@ -98,7 +95,6 @@ const ChatScreen = ({route, navigation}) => {
       }
     }, 100);
     return () => {
-      console.log('clear on check chat id useEffect ');
       clearTimeout(clear);
       setmessages([]);
     };
@@ -109,12 +105,11 @@ const ChatScreen = ({route, navigation}) => {
 
     const SENDER = {
       username: userData?.username,
-      image: userData?.image,
+      image: userData?.image || "",
       id: userData?._id,
       phoneNumber: userData?.phoneNumber,
     };
 
-    console.log(messageId);
 
     if (mesgContent !== '') {
       setmessages(o => [
@@ -147,14 +142,13 @@ const ChatScreen = ({route, navigation}) => {
                   saveLastChat({
                     friendData: {
                       username: freindData?.username,
-                      image: freindData?.image,
+                      image: freindData?.image || "",
                       id: freindData?._id,
                       phoneNumber: freindData?.phoneNumber,
                     },
                     chat: chatId,
                   })
                     .then(o => {
-                      console.log(o);
                       setOnceSaveCHat(1);
                     })
                     .cach(err => console.log(err));
@@ -163,13 +157,12 @@ const ChatScreen = ({route, navigation}) => {
               .catch(err => console.log(err.message));
           }
 
-          console.log(suc);
         })
         .catch(err => {
           console.log(err.message);
         });
 
-      setmesgContent('');
+      
 
       socketIo.emit('sendNotifyNewMessage', [
         friendId,
@@ -193,12 +186,8 @@ const ChatScreen = ({route, navigation}) => {
           isRead: '0',
         },
       ]);
-
-      // send mesg to usre
-
-      //   console.log(AllMessagesRef,"last mesg:::::::::::::::::::");
-
-      //   saveMessAllMessagesRefagesAndChats()
+      setmesgContent('');
+      
     }
   };
 
@@ -213,8 +202,8 @@ const ChatScreen = ({route, navigation}) => {
       });
 
       await notifee.displayNotification({
-        // title: 'دردشه',
-        // body: '',
+        title: 'دردشه',
+        body: '',
         android: {
           channelId,
           asForegroundService: true,
@@ -232,7 +221,7 @@ const ChatScreen = ({route, navigation}) => {
         .then(() => {
           const SENDER = {
             username: userData?.username,
-            image: userData?.image,
+            image: userData?.image || "",
             id: userData?._id,
             phoneNumber: userData?.phoneNumber,
           };
@@ -247,15 +236,15 @@ const ChatScreen = ({route, navigation}) => {
 
   const STATUSBAR_HEIGHT = StatusBar.currentHeight;
 
-  useEffect(() => {
-    if (chatId) {
-      const mesg = AllMessages.filter(item => item.chat == chatId);
-      setmessages(mesg);
-    }
-    return () => {
-      setmessages([]);
-    };
-  }, [chatId]);
+  // useEffect(() => {
+  //   if (chatId) {
+  //     const mesg = AllMessages.filter(item => item.chat == chatId);
+  //     setmessages(mesg);
+  //   }
+  //   return () => {
+  //     setmessages([]);
+  //   };
+  // }, [chatId]);
 
   useEffect(() => {
     socketIo.on('reciveNewMessage', data => {
@@ -285,7 +274,7 @@ const ChatScreen = ({route, navigation}) => {
         }}
         style={{flex: 1, backgroundColor: '#fff'}}>
         <LinearGradient
-          colors={['#5B70F7', '#7F8CE9']}
+          colors={[colors.primary, colors.primary]}
           start={{x: 0, y: 2}}
           end={{x: 0, y: 0}}
           style={{
@@ -316,10 +305,10 @@ const ChatScreen = ({route, navigation}) => {
               icon={{name: 'user', type: 'ant-design'}}
               // containerStyle={{borderColor: '#fff', backgroundColor: '#974ECF'}}
               source={
-                freindData?.image == 'image-user.png'
+                !freindData?.image || (freindData?.image == 'image-user.png' || freindData?.image == "")
                   ? require('../../assets/images/user-image.png')
                   : {uri: freindData?.image}
-              } // source={require("../../assets/images/defult.png")}
+              } 
             />
             <View style={{width: '70%', marginHorizontal: 5}}>
               <Text
@@ -392,7 +381,7 @@ const ChatScreen = ({route, navigation}) => {
               console.log(messages[0]);
             }} /> */}
                 <LinearGradient
-                  colors={compar ? ['#6574E6', '#9884E6'] : ['#fff', '#eff']}
+                  colors={compar ? [colors.primary, colors.primary] : [colors.light, colors.light]}
                   start={{x: 0, y: 0}}
                   end={{x: 1, y: 0}}
                   style={{
@@ -445,10 +434,12 @@ const ChatScreen = ({route, navigation}) => {
             <View style={{flex: 1}}>
               <Input
                 placeholder="اكتب ..."
-                bg="#fff"
-                e={5}
+                bg={"#fff"}
+                bw={2}
+                bc={colors.secondry}
+                e={0}
                 shc="#08d"
-                br={50}
+                br={10}
                 ph={20}
                 mult
                 icn2="send"
@@ -465,15 +456,12 @@ const ChatScreen = ({route, navigation}) => {
                 justifyContent: 'center',
                 backgroundColor: '#fff',
                 padding: 5,
-                margin: 5,
-                borderRadius: 50,
-                elevation: 5,
+                elevation: 10,
                 shadowColor: '#08d',
                 transform: [{rotate: '180deg'}],
                 overflow: 'hidden',
               }}>
-                <Image style={{width:35,height:35,tintColor:"#08d"}} source={require("../../assets/images/send.png")} />
-              {/* <Icon
+              <Icon
                 name="send-sharp"
                 type="ionicon"
                 containerStyle={{borderRadius:500}}
@@ -483,13 +471,12 @@ const ChatScreen = ({route, navigation}) => {
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
-                color={'#08d'}
+                color={colors.secondry}
                 size={30}
                 onPress={() => {
-                  sendMessage();
-                  // console.log(AllMessages.filter(item => item.chat == chatId),"");
+                  // sendMessage();
                 }}
-              /> */}
+              />
             </View>
           </View>
         </View>
@@ -539,6 +526,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderTopEndRadius: 10,
     borderTopStartRadius: 10,
-    margin: 10,
+    padding: 5,
+    backgroundColor:"#fff"
   },
 });

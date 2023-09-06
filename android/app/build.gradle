@@ -1,5 +1,6 @@
 apply plugin: "com.android.application" 
 apply plugin: "com.google.gms.google-services" 
+apply plugin: "com.facebook.react"
 
 import com.android.build.OutputFile
 import org.apache.tools.ant.taskdefs.condition.Os
@@ -83,7 +84,7 @@ project.ext.react = [
     enableHermes: false,  // clean and rebuild if changing
 ]
 
-apply from: "../../node_modules/react-native/react.gradle"
+// apply from: "../../node_modules/react-native/react.gradle"
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
 
 /**
@@ -133,19 +134,17 @@ def reactNativeArchitectures() {
 
 android {
 
-       dexOptions {
-   incremental true
-   javaMaxHeapSize "4g"
-}
-
     ndkVersion rootProject.ext.ndkVersion
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    compileOptions {
-            sourceCompatibility JavaVersion.VERSION_1_8
-            targetCompatibility JavaVersion.VERSION_1_8
-        }
+    // compileOptions {
+    //         sourceCompatibility JavaVersion.VERSION_1_8
+    //         targetCompatibility JavaVersion.VERSION_1_8
+    //     }
+
+    namespace "com.sendMe" // pay attention to the name 
+    
 
     defaultConfig {
         vectorDrawables.useSupportLibrary = true

@@ -5,12 +5,12 @@ import { BACK_END_URL } from '../Requists';
 import {useAuth} from './Auth_Context'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLocalDataBase } from './LocalDataBase';
-import Peer from "react-native-peerjs"
+// import Peer from "react-native-peerjs"
 import { useNavigation } from '@react-navigation/native';
-import {
-  mediaDevices,
-  RTCView
-} from 'react-native-webrtc';
+// import {
+//   mediaDevices,
+//   RTCView
+// } from 'react-native-webrtc';
 import { socketIo } from './Socket_context';
 import notifee, { AndroidImportance } from '@notifee/react-native';
 const CallingContext = createContext({});

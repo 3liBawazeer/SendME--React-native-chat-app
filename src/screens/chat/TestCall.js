@@ -1,13 +1,13 @@
 import React , { useEffect ,useRef} from 'react'
 import { StyleSheet, Text, View , Image ,Dimensions} from 'react-native'
 import LinearGradient from 'react-native-linear-gradient'
-import {
-    mediaDevices,
-    RTCView,
-    MediaStreamTrack
-  } from 'react-native-webrtc';
+// import {
+//     mediaDevices,
+//     RTCView,
+//     MediaStreamTrack
+//   } from 'react-native-webrtc';
 import { Icon ,Button } from '@rneui/themed'
-import Peer from "react-native-peerjs"
+// import Peer from "react-native-peerjs"
 import { socketIo } from '../../Contexts/Socket_context';
 
 const {height, width} = Dimensions.get('window');

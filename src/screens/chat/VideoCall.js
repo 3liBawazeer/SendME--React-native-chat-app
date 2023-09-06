@@ -1,11 +1,11 @@
 import { StyleSheet, Text, View ,Dimensions} from 'react-native'
 import React, { useEffect , useState } from 'react'
 import { Icon ,Button } from '@rneui/themed'
-import {
-    mediaDevices,
-    RTCView,
-    MediaStreamTrack
-  } from 'react-native-webrtc';
+// import {
+//     mediaDevices,
+//     RTCView,
+//     MediaStreamTrack
+//   } from 'react-native-webrtc';
 import { socketIo, useSocket } from '../../Contexts/Socket_context';
 import { useCalling } from '../../Contexts/Call_Context';
 const {height, width} = Dimensions.get('window');

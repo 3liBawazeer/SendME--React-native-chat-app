@@ -83,7 +83,7 @@ const HomeView = ({
                   }}>
                   <Image
                     // source={{uri:"https://firebasestorage.googleapis.com/v0/b/chatyphoneauth-ff1a8.appspot.com/o/usersImgaes%2F712345678-profile.png?alt=media&token=e990bc54-839d-4638-8b7f-c2d770688f88"}}
-                    source={item?.friendData?.image == "image-user.png"?require('../../assets/images/user-image.png'):{uri:item?.friendData?.img}}
+                    source={!item?.friendData?.image || item?.friendData?.image == "image-user.png" || item?.friendData?.image === "" ?require('../../assets/images/user-image.png'):{uri:item?.friendData?.image}}
                     style={{width: 45, height: 45, borderRadius: 55}}
                   />
                 </View>

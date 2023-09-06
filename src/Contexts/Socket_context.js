@@ -22,9 +22,12 @@ const Socket_context = ({children}) => {
           socketIo.on("connect",()=>{
           console.log("user connected in client ... !")
          });
-       return () => {
+      }
+      if(userData?._id){
+        socketIo.emit("joinNotificationRoom",{userId:userData._id})
+      }
+      return () => {
 
-       }
       }
     },[userData])
 
@@ -36,18 +39,11 @@ const Socket_context = ({children}) => {
       })
 
       return ()=>{
-        socketIo.off("reciveNotifyNewMessage",reciveMessagesfun )
+        // socketIo.off("reciveNotifyNewMessage",reciveMessagesfun )
       }
     }, [socketIo])
-    
-    useEffect(() => {
-      if(userData?._id){
-        socketIo.emit("joinNotificationRoom",{userId:userData._id})
-      }
-    }, [userData])
+ 
 
-
-  
    const reciveMessagesfun =  (data) => {
  
         saveMessage({

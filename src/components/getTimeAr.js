@@ -11,6 +11,7 @@ import {
   TextInput,
 } from 'react-native';
 import React, {useEffect, useLayoutEffect, useState, useRef} from 'react';
+import { colors } from '../assets/colors';
 
 let id = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
 const enToAr = s =>
@@ -104,8 +105,8 @@ const GetDateLastMessages = ({date, item, index, messages}) => {
     return (
       <View
         style={{alignItems: 'center', justifyContent: 'center', margin: 10}}>
-        <View style={{backgroundColor: '#eee', padding: 7, borderRadius: 10}}>
-          <Text style={{color: '#0088'}}> اليوم </Text>
+        <View style={{backgroundColor: colors.secondry+88, padding: 7, borderRadius: 10}}>
+          <Text style={{color: colors.typograf}}> اليوم </Text>
         </View>
       </View>
     );
@@ -113,8 +114,8 @@ const GetDateLastMessages = ({date, item, index, messages}) => {
     return (
       <View
         style={{alignItems: 'center', justifyContent: 'center', margin: 10}}>
-        <View style={{backgroundColor: '#eee', padding: 7, borderRadius: 10}}>
-          <Text style={{color: '#0088'}}> أمس </Text>
+        <View style={{backgroundColor: colors.secondry+88, padding: 7, borderRadius: 10}}>
+          <Text style={{color: colors.typograf}}> أمس </Text>
         </View>
       </View>
     );
@@ -122,8 +123,8 @@ const GetDateLastMessages = ({date, item, index, messages}) => {
     return (
       <View
         style={{alignItems: 'center', justifyContent: 'center', margin: 10}}>
-        <View style={{backgroundColor: '#eee', padding: 7, borderRadius: 10}}>
-          <Text style={{color: '#0088'}}>
+        <View style={{backgroundColor: colors.secondry+88, padding: 7, borderRadius: 10}}>
+          <Text style={{color: colors.typograf}}>
             {enToAr(getDate(JSON.parse(item.timestamp)).date)}
           </Text>
         </View>

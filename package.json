@@ -10,11 +10,12 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@notifee/react-native": "^5.6.0",
+    "@notifee/react-native": "^7.8.0",
     "@react-native-async-storage/async-storage": "^1.17.7",
     "@react-native-clipboard/clipboard": "^1.10.0",
     "@react-native-firebase/app": "^15.3.0",
     "@react-native-firebase/auth": "^15.3.0",
+    "@react-native-firebase/messaging": "^18.3.2",
     "@react-native-firebase/storage": "^15.3.0",
     "@react-navigation/bottom-tabs": "^6.3.2",
     "@react-navigation/native": "^6.0.11",
@@ -28,7 +29,8 @@
     "react-native": "0.72.4",
     "react-native-contacts": "^7.0.4",
     "react-native-country-picker-modal": "^2.0.0",
-    "react-native-gesture-handler": "^2.5.0",
+    "react-native-gesture-handler": "^2.12.1",
+    "react-native-gradle-plugin": "^0.71.19",
     "react-native-image-crop-picker": "^0.38.0",
     "react-native-linear-gradient": "^2.6.2",
     "react-native-otp-inputs": "^7.4.0",
@@ -43,7 +45,6 @@
     "react-native-swiper": "^1.6.0",
     "react-native-uuid": "^2.0.1",
     "react-native-vector-icons": "^9.2.0",
-    "react-native-webrtc": "1.100.0",
     "socket.io-client": "^4.5.1"
   },
   "devDependencies": {

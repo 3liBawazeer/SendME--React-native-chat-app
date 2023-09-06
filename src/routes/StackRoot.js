@@ -5,7 +5,7 @@ import SignUp from '../screens/auth/SignUp'
 import SignIn from '../screens/auth/SignIn'
 import Home from '../screens/Home/Home'
 import ChatScreen from '../screens/chat/ChatScreen'
-import SearchScreen from '../screens/TabBarScreens/SearchScreen'
+// import SearchScreen from '../screens/TabBarScreens/SearchScreen'
 import VideoCall from '../screens/chat/VideoCall'
 import TestCall from '../screens/chat/TestCall'
 import SPLASHSCREEN from '../screens/SPLASHSCREEN'
@@ -27,9 +27,9 @@ const StackRoot = () => {
             <stack.Screen name='signIn'      component={SignIn} />
             <stack.Screen name='signUp'      component={SignUp} />
             <stack.Screen name='home'        component={Home} />
-            <stack.Screen name='search'      component={SearchScreen} />
+            {/* <stack.Screen name='search'      component={SearchScreen} /> */}
             <stack.Screen name='chat'        component={ChatScreen} />
-            <stack.Screen name='VideoCall'   component={VideoCall} />
+            {/* <stack.Screen name='VideoCall'   component={VideoCall} /> */}
             <stack.Screen name='friendsList' component={FriendsList} />
             <stack.Screen name='SettingHome' component={SettingHome} />
             <stack.Screen name='EditProfile' component={EditProfile} />

@@ -10,6 +10,7 @@ import {
   Image,
   Modal,
   StatusBar,
+  ToastAndroid,
 } from 'react-native';
 import {editProfile, signIn, signUp} from '../../Requists';
 import {TouchableOpacity} from 'react-native-gesture-handler';
@@ -32,6 +33,8 @@ const EditProfile = ({navigation}) => {
     setusername(userData.username)
     return () => setusername("")
   }, []);
+
+  
 
   const {saveloggedIn, userData, Token } = useAuth();
   const {RemoveAllData} = useLocalDataBase();
@@ -68,7 +71,7 @@ const EditProfile = ({navigation}) => {
             };
             saveloggedIn(allData);
             setImageSelected('');
-            // navigation.goBack();
+            ToastAndroid.show("تم تعديل الصورة")
           })
           .catch(err => {
             seteditImageLoading(false);
@@ -86,16 +89,20 @@ const EditProfile = ({navigation}) => {
   };
   const selectImage = () => {
     ImagePicker.openPicker({
-      width: 300,
-      height: 400,
+      // width: 300,
+      // height: 400,
       cropping: true,
       cropperCircleOverlay: true,
+      freeStyleCropEnabled:true
     }).then(image => {
       setImageSelected(image.path);
       editImage(image.path);
-    });
+    }).catch(()=>{
+      
+    })
   };
 
+  console.log(userData?.image);
 
   const editName = () => {
     console.log(username);
@@ -247,9 +254,9 @@ const EditProfile = ({navigation}) => {
                 <Image
                   style={{width: '100%', height: '100%',backgroundColor:"#eef"}}
                   // source={ImageSelected !== '' && {uri: ImageSelected} }
-                  source={  userData.image == 'image-user.png'
+                  source={ ! userData?.image || userData?.image == 'image-user.png' ||  userData?.image == ""
                   ? require('../../assets/images/user-image.png')
-                  : {uri: userData.image}}
+                  : {uri: userData?.image}}
                 />
               </>
             )}

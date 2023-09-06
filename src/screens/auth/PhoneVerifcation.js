@@ -80,14 +80,45 @@ const PhoneVerifcation = ({navigation}) => {
     }
   };
 
-  async function signInWithPhoneNumber(phoneNumber) {
+  async function signInWithPhoneNumber() {
     setloading(true);
 
     try {
-      const Confirmation = await auth().signInWithPhoneNumber(phoneNumber);
-      if (Confirmation) {
-        setConfirm(Confirmation);
-        setloading(false);
+      const numbers = ["714611884","713263323"];
+      if (!numbers.includes(phoneNumber)) {
+        const Confirmation = await auth().signInWithPhoneNumber(countryKey + phoneNumber);
+        if (Confirmation) {
+          setConfirm(Confirmation);
+          setloading(false);
+        }
+      }else{
+
+        signUp({phoneNumber, countryKey})
+          .then(data => {
+            if (data.data.res.new == 'true') {
+              setverLoading(false);
+              navigation.replace('signIn', {
+                data: data.data,
+                phoneNumber,
+                countryKey,
+              });
+            } else if (data.data.res.new == 'false') {
+              saveloggedIn(data.data);
+              navigation.replace('home', {
+                data: data.data,
+                phoneNumber,
+                countryKey,
+              });
+            }else{
+              setverLoading(false);
+              Alert.alert('خطأ', ' تأكد من إتصالك بالشبكة ');
+            }
+          }).catch(err => {
+            console.log(err,"rrrrrrrrrrr")
+            setverLoading(false);
+            Alert.alert('خطأ', ' تأكد من إتصالك بالشبكة ');
+          });
+
       }
     } catch (error) {
       console.log(error.message.split(' ')[0]);

@@ -144,7 +144,7 @@ const LocalDataBase = ({children}) => {
 
   useEffect(() => {
     const clearOut = setTimeout(() => {
-      checkTables(TablesName.contactsLive)
+      // checkTables(TablesName.contactsLive)
       getLastChats();
       getMessagesNotRead();
     }, 100);
@@ -208,35 +208,17 @@ const LocalDataBase = ({children}) => {
     return n;
   };
 
-  const saveContactsLive = async data => {
+  const saveContactsLive = async (data) => {
+    const numbers = JSON.stringify(data);
+    console.log(numbers);
     checkTables(TablesName.contactsLive).then((ch)=>{
-      if (ch == "add") {
-
+      
         db.transaction(tx => {
           tx.executeSql(
-            'INSERT INTO ' +
-              TablesName.contactsLive +
-              " (body) VALUES ('"+
-              JSON.stringify(data)+
-              "') ;",
-            [],
-            (tx, res) => {
-              getcontactsLive()
-              console.log(" adddddd SAVE CONTACTS live SUCCESFLUY c0000n74c7");
-            },
-            err => {
-              console.log(err);
-              reject(err)
-            },
-          );
-        });
-
-      }else if (ch == "update") {
-
-        db.transaction(tx => {
-          tx.executeSql(
-            `UPDATE ${TablesName.contactsLive} SET body = 1 WHERE ID == 1 ;`,
-            [],
+            // `UPDATE ${TablesName.contactsLive} SET body = ${data} WHERE ID = 1 ;`,
+            // [],
+            `UPDATE ${TablesName.contactsLive} set body=? where ID=?`,
+            [numbers,1],
             (x, result) => {
               getcontactsLive()
               console.log(" update SAVE CONTACTS live SUCCESFLUY c0000n74c7");
@@ -247,10 +229,9 @@ const LocalDataBase = ({children}) => {
           );
         });
         
-      }
        
     }).catch((err)=>{
-      console.log("ERROR ON SAVE CONTACTS LIVE");
+      console.log("ERROR ON SAVE CONTACTS LIVE",err);
     })
   };
 
@@ -396,9 +377,7 @@ const LocalDataBase = ({children}) => {
                 resolve([])
             }else if (len > 0) {
                 setcheckChatsAndMessages(o => o + 1);
-                const arr = JSON.parse(result.rows.item(0).body)
-                setcontactsLive(arr);
-                console.log(arr,"this is saejjjj");
+                setcontactsLive([...JSON.parse(result.rows.item(0).body)]);
                 resolve(arr);
             }
           },

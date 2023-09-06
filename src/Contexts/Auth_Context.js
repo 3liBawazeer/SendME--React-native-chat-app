@@ -36,8 +36,6 @@ const Auth_Context = ({children}) => {
       }
 
     const saveloggedIn = async (data) => { 
-
-      
      if (data.res.user && data.res.token) {
         setUserData(data.res.user)
         await AsyncStorage.setItem("token",data.res.token).then(()=>{

@@ -6,7 +6,7 @@ import {
   PermissionsAndroid,
   TouchableOpacity,
   FlatList,
-  Button,
+  Alert,
   Image,
   StatusBar,
   Linking,
@@ -17,7 +17,7 @@ import {
 import React, {useEffect, useState, useRef} from 'react';
 import {useAuth} from '../../Contexts/Auth_Context';
 import Contacts from 'react-native-contacts';
-import {getAllUsers, sendFriendReq} from '../../Requists';
+import {getAllUsers, getMyContactsInSendMe, sendFriendReq} from '../../Requists';
 import {Modal} from 'react-native';
 import {Icon, SearchBar, Avatar} from '@rneui/themed';
 import LinearGradient from 'react-native-linear-gradient';
@@ -34,15 +34,15 @@ const FriendsList = ({navigation}) => {
   
 
   useEffect(() => {
-    //  && contactsNotReg.length == 0
     if (contactsLive.length == 0) {
       getContact()
+    }else{
+      setcontactsSendMe(contactsLive)
     }
   }, []);
 
   useEffect(() => {
     animationRef.current?.play(0, 240);
-    
     return () => {
       setmyFriends([]);
       setcontactsSendMe([]);
@@ -82,16 +82,15 @@ const FriendsList = ({navigation}) => {
   const [contacts, setcontacts] = useState([]);
   const [myFriends, setmyFriends] = useState([]);
   const [contactsSendMe, setcontactsSendMe] = useState([]);
-  const [friendsNotRegister, setfriendsNotRegister] = useState([]);
-  const [showMDLProfile, setshowMDLProfile] = useState(false);
 
   const getContact = async () => {
     setloadingContacts(true);
     if (Platform.OS === 'ios') {
-      await Contacts.getAll().then(contacts => {
-        setloadingContacts(false);
-      });
+      // await Contacts.getAll().then(contacts => {
+      //   setloadingContacts(false);
+      // });
     } else if (Platform.OS === 'android') {
+
       await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
         {
@@ -103,104 +102,48 @@ const FriendsList = ({navigation}) => {
         Contacts.getAll()
           .then(contacts => {
             setcontacts(contacts);
+            // this is your contacts in your phone | {displayName: "name",phoneNumber:"11110000"}
+            const numbers = contacts.map((item)=>{
+              if (item && item.phoneNumbers.length > 0) {
+                const after = item?.phoneNumbers[0]?.number?.replace(/\-|\)|\(|\s/gi,'');
+                return {displayName:item.displayName, phoneNumber: after};
+              }
+            }).filter((i)=>i);
+            // here we check and get all contact that has a send me acount
             if (Token) {
-              const reContact = contacts.map((item, index) => {
-                if (item.phoneNumbers.length > 0) {
-                  const after = item?.phoneNumbers[0]?.number?.replace(
-                    /\-|\)|\(|\s/gi,
-                    '',
-                  );
-                  return {...item, phoneNumbers: after};
-                }
-              });
 
-              getAllUsers(Token)
-                .then(data => {
-                  const users = data.data.res.users;
-
-                  const all = reContact.map((item, index) => {
-                    if (item) {
-                      if (item?.phoneNumbers[0] == '+') {
-                        const findFrined = users.find(
-                          (im, ix) =>
-                            item?.phoneNumbers ==
-                            im.countryKey + im.phoneNumber,
-                        );
-                        if (findFrined) {
-                          findFrined.username = item.displayName;
-                        }
-                        return findFrined;
-                      } else {
-                        const findFrined = users.find(
-                          (im, ix) => item.phoneNumbers == im.phoneNumber,
-                        );
-                        if (findFrined) {
-                          findFrined.username = item.displayName;
-                        }
-                        return findFrined;
-                      }
-                    }
-                  });
-
-                  const frindes = all.filter(item => {
-                    if (item) {
-                      return item;
-                    }
-                  });
-                  const lastfilter = frindes.filter(
-                    (item, index, inputArray) =>
-                      inputArray.indexOf(item) == index,
-                  );
-
-
-                  saveContactsLive(lastfilter).then((res)=>{
-                    console.log("save contacts succ");
-                  })
-
-                  setmyFriends(lastfilter);
-                  setcontactsSendMe(lastfilter);
-                  setloadingContacts(false);
-
-                  // const allFreindNotReg = reContact.filter((item, index) => {
-                  //   if (item?.phoneNumbers[0] == '+') {
-                  //     return lastfilter.find(
-                  //       ite =>
-                  //         item?.phoneNumbers !==
-                  //         ite.countryKey + ite.phoneNumber,
-                  //     );
-                  //   } else {
-                  //     return lastfilter.find(
-                  //       ite => item?.phoneNumbers !== ite.phoneNumber,
-                  //     );
-                  //   }
-                  // });
-                  // const fliterTrue = allFreindNotReg.filter(item => {
-                  //   if (item) {
-                  //     return item;
-                  //   }
-                  // });
-                  // const lastfilterNotReg = fliterTrue.filter(
-                  //   (item, index, inputArray) =>
-                  //     inputArray.indexOf(item) == index,
-                  // );
-                  //  setfriendsNotRegister(lastfilterNotReg);
-                  //  saveContactsNotReg(lastfilterNotReg)
-
-
+              getMyContactsInSendMe(Token,numbers).then((data)=>{
+                const users = data.data.res.users;
+                // console.log(data.data.res,"dddddddddddddddddd");
+                saveContactsLive(users).then((res)=>{
+                  console.log("save contacts succ");
+                }).catch((err)=>{
+                  console.log(err,"\n from saveContactsLive ");
                 })
-                .catch(err => {
-                  console.log(err);
-                  // setloadingContacts(false)loadingContacts(false);
-              Alert.alert('خطأ', ' تأكد من إتصالك بالشبكة ');
-                });
+
+                // setmyFriends(users);
+                setcontactsSendMe(users);
+                setloadingContacts(false);
+
+
+              })
+              .catch((err)=>{
+                setloadingContacts(false);
+                console.error(err)
+              })
+
             }
+
           })
           .catch(e => {
             console.log(e);
-            loadingContacts(false);
-              Alert.alert('خطأ', ' تأكد من إتصالك بالشبكة ');
+            setloadingContacts(false);
+            Alert.alert('خطأ', ' تأكد من إتصالك بالشبكة ');
           });
-      });
+      }).catch(err=>{
+        setloadingContacts(false);
+        console.log(err);
+      })
     }
   };
 
@@ -215,9 +158,7 @@ const FriendsList = ({navigation}) => {
   const [search, setSearch] = useState('');
 
   const SearchBar = name => {
-    // const serch = myFriends.filter((item,index)=> item.username.toLocaleLowerCase().includes(search.toLocaleLowerCase()))
-    //  console.log(serch);
-    // setmyFriends(serch)
+
     let filtered = myFriends.filter(item => {
       const arr = name.split(' ');
       return arr.some(el =>
@@ -348,7 +289,7 @@ const FriendsList = ({navigation}) => {
       </Text>
       <FlatList
         // data={[...myFriends]}
-        data={[...contactsLive]}
+        data={[...contactsSendMe]}
         onRefresh={() => getContact()}
         refreshing={loadingContacts}
         ListEmptyComponent={
@@ -388,7 +329,6 @@ const FriendsList = ({navigation}) => {
               {borderBottomWidth: index == myFriends.length - 1 ? 0 : 1},
             ]}
             onPress={() => {
-              console.log(item);
               navigation.navigate('chat', {
                   checkChat: true,
                   newfriendData: item,
@@ -399,7 +339,7 @@ const FriendsList = ({navigation}) => {
               rounded
               icon={{name: 'user', type: 'ant-design'}}
               source={
-                item?.image == 'image-user.png'
+                item?.image == 'image-user.png' || item?.image == ""
                   ? require('../../assets/images/user-image.png')
                   : {uri: item?.image}
               }
@@ -408,7 +348,6 @@ const FriendsList = ({navigation}) => {
                 backgroundColor: '#974ECF',
                 marginHorizontal: 10,
               }}
-              // source={require("../../assets/images/defult.png")}
             />
             <View style={{alignItems: 'flex-start'}}>
               <Text style={{fontWeight: '700', fontSize: 16, color: '#08d'}}>

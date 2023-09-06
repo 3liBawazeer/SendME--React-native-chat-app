@@ -89,16 +89,18 @@ const SignIn = ({navigation, route}) => {
     setloading(true);
     setuploadLoading(true)
     try {
+      let image;
       // save image in firebase storage
-      const reference = storage().ref(
-        `usersImgaes/${data.res.user.phoneNumber}-profile.png`,
-      );
-      await reference.putFile(ImageSelected);
-
-    //   get uri image from firebase storage
-    const image = await storage().ref(`usersImgaes/${data.res.user.phoneNumber}-profile.png`).getDownloadURL();
-      if (image) {
-        editProfile({phoneNumber, username , image}, data.res.token)
+      if(ImageSelected != ""){
+          const reference = storage().ref(
+            `usersImgaes/${data.res.user.phoneNumber}-profile.png`,
+          );
+           await reference.putFile(ImageSelected);
+           //   get uri image from firebase storage
+           image = await storage().ref(`usersImgaes/${data.res.user.phoneNumber}-profile.png`).getDownloadURL();
+      }
+      if (true) {
+        editProfile({phoneNumber, username , image:image || ""}, data.res.token)
         .then(dat => {
           const allData = {
             res: {user: dat.data.res.user, token: data.res.token},
