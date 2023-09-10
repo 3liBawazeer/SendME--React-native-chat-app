@@ -1,41 +1,41 @@
 {
   "project_info": {
-    "project_number": "798863527212",
-    "project_id": "chatyphoneauth-ff1a8",
-    "storage_bucket": "chatyphoneauth-ff1a8.appspot.com"
+    "project_number": "208885843160",
+    "project_id": "sendme-98b81",
+    "storage_bucket": "sendme-98b81.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:798863527212:android:54142bf8a7d0260cea7089",
+        "mobilesdk_app_id": "1:208885843160:android:7341f9430877bf3e37c3ad",
         "android_client_info": {
-          "package_name": "com.sendMe"
+          "package_name": "com.hadramsoft.sendme"
         }
       },
       "oauth_client": [
         {
-          "client_id": "798863527212-lev397offbajmc791g7ij91ej7gtk730.apps.googleusercontent.com",
+          "client_id": "208885843160-ndm0lr0bd08453fhvlgpn8saa625flep.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.sendMe",
+            "package_name": "com.hadramsoft.sendme",
             "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
           }
         },
         {
-          "client_id": "798863527212-au3g336ua23bi1m9ng4jtv3epamnehbs.apps.googleusercontent.com",
+          "client_id": "208885843160-l9cepleu1e0559r1g37efmb9ka8lvtr9.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDt0LhgDMPoOeTr8n2-bz14WqL5yFb5o8o"
+          "current_key": "AIzaSyA-orux9Sl09Pwj-SVXLb3SABd7_fEcFsc"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "798863527212-au3g336ua23bi1m9ng4jtv3epamnehbs.apps.googleusercontent.com",
+              "client_id": "208885843160-l9cepleu1e0559r1g37efmb9ka8lvtr9.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

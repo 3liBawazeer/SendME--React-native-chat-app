@@ -3,7 +3,6 @@ import {
   StyleSheet,
   View,
   Platform,
-  Image,
   Text,
   FlatList,
   StatusBar,
@@ -18,7 +17,7 @@ import {socketIo, useSocket} from '../../Contexts/Socket_context';
 import {ActivityIndicator} from 'react-native';
 import Input from '../../components/Input';
 import {useLocalDataBase} from '../../Contexts/LocalDataBase';
-import {Icon, Avatar, Header, Button} from '@rneui/themed';
+import {Icon, Avatar, Header, Button} from '@rneui/base';
 import {useCalling} from '../../Contexts/Call_Context';
 import notifee, {AndroidImportance} from '@notifee/react-native';
 import LinearGradient from 'react-native-linear-gradient';
@@ -49,6 +48,11 @@ const ChatScreen = ({route, navigation}) => {
   const [freindData, setfreindData] = useState(null);
   const [OnceSaveCHat, setOnceSaveCHat] = useState(0);
 
+  const cleanChannels = async () => { 
+//     await notifee.deleteChannelGroup({id: (chatId + "group") || "group"},);
+
+//  await notifee.deleteChannel({id:chatId || "channelID",})
+   }
   const checkChatsAndAdd = () => {
     const data = {
       myId: userData._id,
@@ -72,6 +76,7 @@ const ChatScreen = ({route, navigation}) => {
   useEffect(() => {
     if (chatId) {
       socketIo.emit('joinToChat', chatId);
+      cleanChannels()
       checkIsRead(chatId);
       getMessagesNotRead();
       const mesg = AllMessages.filter(item => item.chat == chatId);
@@ -108,6 +113,7 @@ const ChatScreen = ({route, navigation}) => {
       image: userData?.image || "",
       id: userData?._id,
       phoneNumber: userData?.phoneNumber,
+      FCMtoken:userData?.FCMtoken || ""
     };
 
 
@@ -145,6 +151,7 @@ const ChatScreen = ({route, navigation}) => {
                       image: freindData?.image || "",
                       id: freindData?._id,
                       phoneNumber: freindData?.phoneNumber,
+                      FCMtoken:freindData?.FCMtoken
                     },
                     chat: chatId,
                   })
@@ -174,6 +181,7 @@ const ChatScreen = ({route, navigation}) => {
           timestamp: Date.now(),
           isRead: '0',
         },
+        userData?.FCMtoken
       ]);
       socketIo.emit('sendNewMessage', [
         friendId,
@@ -185,6 +193,10 @@ const ChatScreen = ({route, navigation}) => {
           timestamp: Date.now(),
           isRead: '0',
         },
+        {
+          senderToken:userData?.FCMtoken,
+          reciverToken:freindData?.FCMtoken,
+        }
       ]);
       setmesgContent('');
       
@@ -246,6 +258,7 @@ const ChatScreen = ({route, navigation}) => {
   //   };
   // }, [chatId]);
 
+ 
   useEffect(() => {
     socketIo.on('reciveNewMessage', data => {
       setmessages(o => [...o, data]);
@@ -264,43 +277,47 @@ const ChatScreen = ({route, navigation}) => {
 
   return (
     <>
-      <ImageBackground
-        source={require('./../../assets/images/wallpaper.png')}
-        imageStyle={{
-          opacity: 0.5,
-          width: '100%',
-          height: '100%',
-          tintColor: '#0B1A90',
-        }}
-        style={{flex: 1, backgroundColor: '#fff'}}>
+      <View
+        // source={require('./../../assets/images/wallpaper.png')}
+        // imageStyle={{
+        //   opacity: 0.5,
+        //   width: '100%',
+        //   height: '100%',
+        //   tintColor: '#0B1A90',
+        // }}
+        style={{flex: 1, backgroundColor: colors.light}}>
         <LinearGradient
           colors={[colors.primary, colors.primary]}
           start={{x: 0, y: 2}}
           end={{x: 0, y: 0}}
           style={{
-            borderRadius: 10,
+            borderRadius: 15,
             flexDirection: 'row',
             alignItems: 'center',
             borderTopRightRadius: 0,
             borderTopLeftRadius: 0,
             paddingVertical: 5,
             paddingTop: STATUSBAR_HEIGHT,
+            elevation:10,
+            shadowColor:colors.primary,
+            paddingVertical:15
           }}>
           <StatusBar translucent={true} backgroundColor={'transparent'} />
 
           <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
-            <View>
+            <View style={{borderRadius:10,overflow:"hidden"}} >
               <Icon
                 name="arrow-right"
                 type="feather"
                 size={20}
                 color={'#fff'}
+                containerStyle={{borderRadius:10,overflow:"hidden"}}
                 onPress={() => navigation.goBack()}
-                style={{paddingLeft: 8, paddingRight: 5, paddingVertical: 10}}
+                style={{paddingLeft: 8, paddingRight: 8, paddingVertical: 10,}}
               />
             </View>
             <Avatar
-              size={50}
+              size={45}
               rounded
               icon={{name: 'user', type: 'ant-design'}}
               // containerStyle={{borderColor: '#fff', backgroundColor: '#974ECF'}}
@@ -327,7 +344,7 @@ const ChatScreen = ({route, navigation}) => {
                 <Text
                   numberOfLines={1}
                   style={{
-                    color: '#fff',
+                    color: colors.light,
                     fontSize: 10,
                     paddingHorizontal: 5,
                     fontWeight: 'bold',
@@ -366,9 +383,9 @@ const ChatScreen = ({route, navigation}) => {
           onLayout={() => flatlistRef.current.scrollToEnd({animated: true})}
           keyExtractor={(_, x) => x.toString()}
           renderItem={({item, index}) => {
-            const compar = JSON.parse(item.sender).id == userData?._id;
+            const compar = JSON.parse(item.sender).id !== userData?._id;
             return (
-              <>
+              <View style={{}} >
                 {
                   <GetDateLastMessages
                     messages={[...messages]}
@@ -376,55 +393,60 @@ const ChatScreen = ({route, navigation}) => {
                     item={item}
                     index={index}
                   />
-                }
-                {/* <Button title={"meesaeg"} onPress={()=>{
-              console.log(messages[0]);
-            }} /> */}
+                } 
+                <View style={{flexDirection:compar ?"row":"row-reverse",alignItems:"center",}} >
                 <LinearGradient
-                  colors={compar ? [colors.primary, colors.primary] : [colors.light, colors.light]}
+                  colors={compar ? [colors.primary, colors.primary] : [colors.secondry, colors.secondry]}
                   start={{x: 0, y: 0}}
                   end={{x: 1, y: 0}}
                   style={{
                     alignSelf:
-                      JSON.parse(item.sender).id == userData?._id
+                      compar
                         ? 'flex-start'
                         : 'flex-end',
-                    paddingTop: 5,
-                    paddingHorizontal: 10,
+                    // paddingTop: 5,
                     marginVertical: 5,
                     borderTopRightRadius: compar ? 0 : 15,
                     borderBottomRightRadius: compar ? 15 : 15,
                     borderTopLeftRadius: compar ? 15 : 0,
                     borderBottomLeftRadius: compar ? 15 : 15,
                     margin: 5,
-                    marginLeft: compar ? 5 : 50,
-                    marginRight: compar ? 50 : 5,
-                    elevation: 10,
+                    // marginLeft: compar ? 5 : 50,
+                    // marginRight: compar ? 50 : 5,
+                    // elevation: 10,
+                    padding:10,
+                    paddingHorizontal:15,
+                    alignItems:"center",
+                    justifyContent:"center",
+                    maxWidth:"85%"
                   }}>
                   <Text
                     style={{
-                      color: compar ? '#fff' : '#0B1A80',
+                      color: compar ? colors.light : colors.light,
                       fontSize: 15,
-                      // height:25
-                      // backgroundColor:"#fff",
+                      fontWeight:"600",
+                      textAlignVertical:"center"
                     }}>
                     {item.content}
                   </Text>
-                  <Text
+                  
+                </LinearGradient>
+                <View style={{alignItems:"center",justifyContent:'center',}} >
+                  {/* <Icon name="check" color={colors.green} size={15} /> */}
+                <Text
                     style={{
-                      color: compar ? '#fff' : '#0B1A80',
-                      fontSize: 10,
+                      color: compar ? colors.primary : colors.secondry,
+                      fontSize: 12,
                       textAlign: 'left',
                       padding: 1,
-                      // position: 'absolute',
-                      // bottom: 3,
-                      // right: 5,
+                      marginHorizontal:10,
+                      fontWeight:"bold"
                     }}>
-                    {' '}
                     {formatDate(JSON.parse(item.timestamp))}{' '}
-                  </Text>
-                </LinearGradient>
-              </>
+                </Text>
+                </View>
+                </View>
+              </View>
             );
           }}
         />
@@ -435,8 +457,7 @@ const ChatScreen = ({route, navigation}) => {
               <Input
                 placeholder="اكتب ..."
                 bg={"#fff"}
-                bw={2}
-                bc={colors.secondry}
+                bw={0}
                 e={0}
                 shc="#08d"
                 br={10}
@@ -454,27 +475,26 @@ const ChatScreen = ({route, navigation}) => {
               style={{
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: '#fff',
-                padding: 5,
-                elevation: 10,
-                shadowColor: '#08d',
-                transform: [{rotate: '180deg'}],
                 overflow: 'hidden',
+                backgroundColor:mesgContent != "" ? colors.primary : colors.secondry,
+                borderRadius:50,
+                
               }}>
               <Icon
-                name="send-sharp"
-                type="ionicon"
+                name="send"
+                type="font-awesome"
                 containerStyle={{borderRadius:500}}
                 style={{
-                  width: 40,
-                  height: 40,
+                  paddingHorizontal:15,
+                  padding:15,
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
-                color={colors.secondry}
-                size={30}
+                disabled={mesgContent != ""}
+                color={colors.light}
+                size={20}
                 onPress={() => {
-                  // sendMessage();
+                  sendMessage();
                 }}
               />
             </View>
@@ -506,7 +526,7 @@ const ChatScreen = ({route, navigation}) => {
             </View>
           </View>
         )}
-      </ImageBackground>
+      </View>
     </>
   );
 };
@@ -517,16 +537,15 @@ const styles = StyleSheet.create({
   inpt: {
     overflow: 'hidden',
     marginTop: 0,
-    // elevation: 5,
-    // borderTopWidth: 1,
-    // backgroundColor: '#fff',
-    // height: 50,
-    // borderColor: '#08d5',
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderTopEndRadius: 10,
-    borderTopStartRadius: 10,
+    flexDirection: 'row-reverse',
+    // alignItems: 'center',
+    // borderTopEndRadius: 10,
+    // borderTopStartRadius: 10,
     padding: 5,
-    backgroundColor:"#fff"
+    backgroundColor:"#fff",
+    margin:10,
+    borderRadius:50,
+    // borderWidth:2,
+    borderColor:colors.secondry
   },
 });

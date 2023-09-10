@@ -1,4 +1,4 @@
-package com.sendMe.newarchitecture.components;
+package com.hadramsoft.sendme.newarchitecture.components;
 
 import com.facebook.jni.HybridData;
 import com.facebook.proguard.annotations.DoNotStrip;

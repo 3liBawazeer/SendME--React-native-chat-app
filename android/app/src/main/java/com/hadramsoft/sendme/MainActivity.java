@@ -1,4 +1,4 @@
-package com.sendMe;
+package com.hadramsoft.sendme;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;

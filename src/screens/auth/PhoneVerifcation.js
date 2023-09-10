@@ -22,6 +22,8 @@ import {useAuth} from '../../Contexts/Auth_Context';
 import StepIndicator from 'react-native-step-indicator';
 import Lottie from 'lottie-react-native';
 import { Input } from '@rneui/themed';
+import messageing from "@react-native-firebase/messaging"
+import { colors } from '../../assets/colors';
 // cokors 7207c4 ==>
 
 const customStyles = {
@@ -56,6 +58,8 @@ const PhoneVerifcation = ({navigation}) => {
     animationRef.current?.play(0, 240);
   }, []);
 
+  
+
   // If null, no SMS has been sent
   const [confirm, setConfirm] = useState(null);
   const [phoneNumber, setphoneNumber] = useState('');
@@ -84,7 +88,7 @@ const PhoneVerifcation = ({navigation}) => {
     setloading(true);
 
     try {
-      const numbers = ["714611884","713263323"];
+      const numbers = [];
       if (!numbers.includes(phoneNumber)) {
         const Confirmation = await auth().signInWithPhoneNumber(countryKey + phoneNumber);
         if (Confirmation) {
@@ -92,8 +96,8 @@ const PhoneVerifcation = ({navigation}) => {
           setloading(false);
         }
       }else{
-
-        signUp({phoneNumber, countryKey})
+        const fcmToken = await messageing().getToken();
+        signUp({phoneNumber,countryKey,FCMtoken:fcmToken})
           .then(data => {
             if (data.data.res.new == 'true') {
               setverLoading(false);
@@ -113,15 +117,17 @@ const PhoneVerifcation = ({navigation}) => {
               setverLoading(false);
               Alert.alert('خطأ', ' تأكد من إتصالك بالشبكة ');
             }
-          }).catch(err => {
-            console.log(err,"rrrrrrrrrrr")
+          })
+          .finally(()=>{
             setverLoading(false);
-            Alert.alert('خطأ', ' تأكد من إتصالك بالشبكة ');
-          });
+          })
+          // .catch(err => {
+          //   setverLoading(false);
+          //   Alert.alert('خطأ', ' تأكد من إتصالك بالشبكة ');
+          // });
 
       }
     } catch (error) {
-      console.log(error.message.split(' ')[0]);
       const err = error.message.split(' ')[0];
       switch (err) {
         case '[auth/invalid-phone-number]':
@@ -134,6 +140,7 @@ const PhoneVerifcation = ({navigation}) => {
           Alert.alert('خطأ', 'تأكد من إتصالك بالشبكة ');
           break;
         default:
+          console.log(error.message);
           break;
       }
       setloading(false);
@@ -143,16 +150,14 @@ const PhoneVerifcation = ({navigation}) => {
   const {saveloggedIn} = useAuth();
 
   async function confirmCode() {
-    console.log("confirm Code <?> ");
     setverLoading(true);
     try {
       const aa = await confirm.confirm(code);
       console.log(aa);
 
       if (aa) {
-        console.log(aa);
-        console.log("aa is true");
-        signUp({phoneNumber, countryKey})
+        const fcmToken = await messageing().getToken();
+        signUp({phoneNumber, countryKey,FCMtoken:fcmToken})
           .then(data => {
             if (data.data.res.new == 'true') {
               setverLoading(false);
@@ -184,7 +189,7 @@ const PhoneVerifcation = ({navigation}) => {
 
     } catch (error) {
       const err = error.message.split(' ')[0];
-      console.log(err, '|||');
+      console.log(error.message, '|||');
       switch (err) {
         case '[auth/invalid-verification-code]':
           Alert.alert('!خطأ', 'رمز التحقق غير صحيح');
@@ -202,7 +207,7 @@ const PhoneVerifcation = ({navigation}) => {
   return (
     <View style={{flex: 1, backgroundColor: '#fff'}}>
       <LinearGradient
-        colors={['#5B70F7', '#7F8CE9']}
+        colors={[colors.primary, colors.primary]}
         start={{x: 0, y: 0}}
         end={{x: 1, y: 0}}>
         <ScrollView ref={scrollViewRef} contentContainerStyle={{}}>
@@ -244,15 +249,15 @@ const PhoneVerifcation = ({navigation}) => {
             <View style={{}}>
               <View
                 style={{
-                  marginBottom: 20,
+                  marginBottom: 0,
                   // marginTop: -5,
                   marginHorizontal: 5,
                   // alignItems: 'center',
                 }}>
                 <Text
                   style={{
-                    fontSize: 15,
-                    color: '#410371',
+                    fontSize: 14,
+                    color: colors.secondry,
                     marginHorizontal: 35,
                   }}>
                   أدخل رقم الجوال للتسجيل الدخول
@@ -284,11 +289,9 @@ const PhoneVerifcation = ({navigation}) => {
                     style={{elevation: 0, backgroundColor: '#fff'}}
                     onPress={() => {
                       checkSignIn();
-
-                      console.log(countryKey + ' ' + phoneNumber);
                     }}>
                     <LinearGradient
-                      colors={['#5B70F7', '#7F8CE9']}
+                      colors={[colors.primary, '#7F8CE9']}
                       start={{x: 1, y: 0}}
                       end={{x: 0, y: 0}}
                       style={styles.btn}>
@@ -321,7 +324,7 @@ const PhoneVerifcation = ({navigation}) => {
       <Modal visible={confirm != null} animationType="slide" onRequestClose={()=>{BackHandler.exitApp()}} >
         <View style={{flex: 1, backgroundColor: '#fff'}}>
           <LinearGradient
-            colors={['#5B70F7', '#7F8CE9']}
+            colors={[colors.primary, colors.primary]}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 0}}>
             <ScrollView contentContainerStyle={{}}> 
@@ -371,7 +374,7 @@ const PhoneVerifcation = ({navigation}) => {
                       marginHorizontal: 5,
                       alignItems: 'center',
                     }}>
-                    <Text style={{fontSize: 14, color: '#410371'}}>
+                    <Text style={{fontSize: 14, color: colors.secondry}}>
                       لقد تم إرسال رمز التحقق الى{' '}
                       {countryKey + ' ' + phoneNumber}
                     </Text>
@@ -430,7 +433,7 @@ const PhoneVerifcation = ({navigation}) => {
                           }
                         }:null}>
                         <LinearGradient
-                          colors={['#5B70F7', '#7F8CE9']}
+                          colors={[colors.primary, '#7F8CE9']}
                           start={{x: 0, y: 0}}
                           end={{x: 1, y: 0}}
                           style={styles.btn}>

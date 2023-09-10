@@ -6,37 +6,36 @@ import StackRoot from './src/routes/StackRoot';
 import Socket_context from './src/Contexts/Socket_context';
 import LocalDataBase from './src/Contexts/LocalDataBase';
 import Call_Context from './src/Contexts/Call_Context';
-import notifee, { AndroidImportance } from '@notifee/react-native';
+import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
 
 
 const App = () => {
 
-  // useEffect(() => {
-  //   fourground()
-  // }, [])
-
-  // const fourground = async () => { 
-  //   try {
-  //     const channelId = await notifee.createChannel( {
-  //       id: 'screen_capture',
-  //       name: 'Screen Capture',
-  //       lights: true,
-  //       vibration: false,
-  //       importance: AndroidImportance.DEFAULT
-  //     } );
-    
-  //     await notifee.displayNotification({
-  //       // title: 'دردشه',
-  //       // body: '',
-  //       android: {
-  //         channelId,
-  //         asForegroundService: true
-  //       }
-  //     } );
-  //   } catch( err ) {
-  //     // Handle Error
-  //   };
-  //  }
+  useEffect(() => {
+    // const subscribe = notifee.onForegroundEvent(({ type, detail }) => {
+    //   const { notification, pressAction,input } = detail;
+  
+    //   if (type === EventType.ACTION_PRESS && pressAction.id !="" ) {
+    //      switch (pressAction?.id) {
+    //       case "reply":
+    //         if (detail?.notification?.data) {
+    //           // sendMessage(input,detail?.notification?.data)
+    //           console.log(input,detail?.notification?.data,"<><>".repeat(100));
+    //         }
+    //         break;
+         
+    //       default:
+    //         break;
+    //      }
+    //     }
+        
+  
+    //   });
+  
+    return () => {
+      // subscribe()
+    }
+  }, [])
 
   return (
     

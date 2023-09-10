@@ -26,7 +26,7 @@ target 'SendMe' do
 
 
 
-  target 'ChatyTests' do
+  target 'SendMeTests' do
     inherit! :complete
     # Pods for testing
   end

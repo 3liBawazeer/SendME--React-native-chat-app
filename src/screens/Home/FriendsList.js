@@ -34,10 +34,29 @@ const FriendsList = ({navigation}) => {
   
 
   useEffect(() => {
-    if (contactsLive.length == 0) {
-      getContact()
-    }else{
-      setcontactsSendMe(contactsLive)
+      const permid = async () => { 
+        await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
+          {
+            title: 'Contacts',
+            message: 'This app would like to view your contacts.',
+            buttonPositive: 'Please accept bare mortal',
+          },
+        ).catch((err)=>{
+           throw Error(err)
+        })
+       }
+
+    permid().then(()=>{
+      if (contactsLive.length == 0) {
+        getContact()
+      }else{
+        setcontactsSendMe(contactsLive)
+      }
+    })
+    
+    return ()=>{
+
     }
   }, []);
 
@@ -86,19 +105,10 @@ const FriendsList = ({navigation}) => {
   const getContact = async () => {
     setloadingContacts(true);
     if (Platform.OS === 'ios') {
-      // await Contacts.getAll().then(contacts => {
-      //   setloadingContacts(false);
-      // });
+     
     } else if (Platform.OS === 'android') {
 
-      await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
-        {
-          title: 'Contacts',
-          message: 'This app would like to view your contacts.',
-          buttonPositive: 'Please accept bare mortal',
-        },
-      ).then(() => {
+      
         Contacts.getAll()
           .then(contacts => {
             setcontacts(contacts);
@@ -116,8 +126,10 @@ const FriendsList = ({navigation}) => {
                 const users = data.data.res.users;
                 // console.log(data.data.res,"dddddddddddddddddd");
                 saveContactsLive(users).then((res)=>{
+                  setloadingContacts(false);
                   console.log("save contacts succ");
                 }).catch((err)=>{
+                  setloadingContacts(false);
                   console.log(err,"\n from saveContactsLive ");
                 })
 
@@ -140,10 +152,7 @@ const FriendsList = ({navigation}) => {
             setloadingContacts(false);
             Alert.alert('خطأ', ' تأكد من إتصالك بالشبكة ');
           });
-      }).catch(err=>{
-        setloadingContacts(false);
-        console.log(err);
-      })
+      
     }
   };
 

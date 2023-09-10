@@ -10,6 +10,7 @@ import {
 import {FlatList} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {formatDate} from "../../components/getTimeAr";
+import { colors } from '../../assets/colors';
 
 
 const HomeView = ({
@@ -61,12 +62,9 @@ const HomeView = ({
               
               <LinearGradient
                 colors={OnlineUsers?.includes(item?.friendData?.id) ?[
-                  '#00FFFF',
-                  '#17C8FF',
-                  '#329BFF',
-                  '#4C64FF',
-                  '#6536FF',
-                  '#8000FF',
+                  colors.green,
+                  colors.primary,
+                  colors.secondry,
                 ]:["#fff","#fff"]}
                 start={{x: 0.0, y: 1.0}}
                 end={{x: 1.0, y: 1.0}}
@@ -92,34 +90,43 @@ const HomeView = ({
               <View style={{marginHorizontal: 7,alignItems:"flex-start",justifyContent:"center"}}>
                 <Text style={styles.name}>{item?.friendData?.username}</Text>
                 <Text style={styles.last} numberOfLines={1}>
-                  {getLastMessage(item?.chat)?.content}
+                  {JSON.parse(getLastMessage(item?.chat)?.sender)?.id == userData?._id ? `انت : ${getLastMessage(item?.chat)?.content}` : getLastMessage(item?.chat)?.content}
                 </Text>
               </View>
 
             </View>
 
             <View style={{alignItems: 'center', justifyContent: 'space-between',marginHorizontal:10}}>
-            <Text style={{fontSize:12}}>
-                {/* {formatDate(JSON.parse(getLastMessage(item?.chat)?.timestamp))} */}
-                </Text>
+            <Text style={{fontSize:10}}>
+                {formatDate(JSON.parse(getLastMessage(item?.chat)?.timestamp))}
+                {/* 20 */}
+            </Text>
               {MessagesNotRead?.filter(ite => ite.chat == item?.chat).length !==
                 0 && (
                 <Text
                   style={{
-                    backgroundColor: '#08d',
+                    backgroundColor: colors.secondry,
                     fontSize:11,
                     color: '#FFF',
                     borderRadius: 50,
                     paddingHorizontal: 8,
                     paddingVertical: 5,
+                    width:MessagesNotRead?.filter(ite => (ite.chat == item?.chat) && JSON.parse(ite.sender).id != userData?._id)
+                    .length <= 9 ? 27 : "auto",
+                    height:27,
+                    textAlign:"center",
+                    textAlignVertical:"center"
                   }}>
                   {
-                    MessagesNotRead?.filter(ite => ite.chat == item?.chat)
-                      .length
+                    MessagesNotRead?.filter(ite => (ite.chat == item?.chat) && JSON.parse(ite.sender).id != userData?._id)
+                      .length 
                   }
                 </Text>
               )}
-              
+              <Text style={{fontSize:5,opacity:0}}>
+                {/* {formatDate(JSON.parse(getLastMessage(item?.chat)?.timestamp))} */}
+                20
+            </Text>
             </View>
           </TouchableOpacity>
         )}

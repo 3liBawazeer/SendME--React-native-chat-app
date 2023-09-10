@@ -13,6 +13,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import {Avatar} from '@rneui/base';
 import RBSheet from "react-native-raw-bottom-sheet";
 import {StatusBar} from 'react-native';
+import { colors } from '../../assets/colors';
 
 const {height, width} = Dimensions.get('window');
 
@@ -57,7 +58,7 @@ const Home = ({navigation}) => {
       <View style={styles.body}>
         <View style={{flex: 1}}>
           <LinearGradient
-            colors={['#5B70F7', '#7F8CE9']}
+            colors={[colors.primary, colors.primary]}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 0}}
             style={{flex: 1, paddingTop: STATUSBAR_HEIGHT}}>
@@ -96,10 +97,10 @@ const Home = ({navigation}) => {
                   source={require('../../assets/images/sendMe_fff.png')}
                   style={{width: 30, height: 45}}
                 />
-                <Text style={{fontSize: 25, fontWeight: '700', color: '#fff'}}>
+                <Text style={{fontSize: 25, fontWeight: '700', color: colors.light }}>
                   END
                   <Text
-                    style={{fontSize: 25, fontWeight: '900', color: '#08d'}}>
+                    style={{fontSize: 25, fontWeight: '900', color: colors.secondry}}>
                     ME
                   </Text>
                 </Text>

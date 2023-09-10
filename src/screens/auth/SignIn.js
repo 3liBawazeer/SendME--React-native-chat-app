@@ -100,12 +100,11 @@ const SignIn = ({navigation, route}) => {
            image = await storage().ref(`usersImgaes/${data.res.user.phoneNumber}-profile.png`).getDownloadURL();
       }
       if (true) {
-        editProfile({phoneNumber, username , image:image || ""}, data.res.token)
+        editProfile({phoneNumber, username , image:image}, data.res.token)
         .then(dat => {
           const allData = {
             res: {user: dat.data.res.user, token: data.res.token},
           };
-          console.log(allData);
           saveloggedIn(allData);
           navigation.replace('home');
         })
@@ -137,7 +136,7 @@ const SignIn = ({navigation, route}) => {
   return (
     <View style={{flex:1,backgroundColor:"#fff"}}>
          <LinearGradient 
-            colors={['#5B70F7','#7F8CE9',]}
+            colors={[colors.primary, colors.primary]}
           start={{ x: 0, y: 0.5}} end={{ x: 1, y: 0 }}
           style={{flex:1}}
             >

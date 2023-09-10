@@ -133,7 +133,7 @@ const LocalDataBase = ({children}) => {
     const clearOut = setTimeout(() => {
       createTable();
       getAllMessages();
-    }, 200);
+    }, 50);
 
     return () => {
       clearTimeout(clearOut);
@@ -156,8 +156,12 @@ const LocalDataBase = ({children}) => {
   }, []);
 
   useEffect(() => {
+    const clearOut = setTimeout(() => {
       getcontactsLive();
+    }, 100);
+
     return () => {
+      clearTimeout(clearOut);
       setcontactsLive([]);
     };
   }, []);
@@ -211,7 +215,7 @@ const LocalDataBase = ({children}) => {
   const saveContactsLive = async (data) => {
     const numbers = JSON.stringify(data);
     console.log(numbers);
-    checkTables(TablesName.contactsLive).then((ch)=>{
+    // checkTables(TablesName.contactsLive).then((ch)=>{
       
         db.transaction(tx => {
           tx.executeSql(
@@ -230,9 +234,9 @@ const LocalDataBase = ({children}) => {
         });
         
        
-    }).catch((err)=>{
-      console.log("ERROR ON SAVE CONTACTS LIVE",err);
-    })
+    // }).catch((err)=>{
+    //   console.log("ERROR ON SAVE CONTACTS LIVE",err);
+    // })
   };
 
   // const saveContactsNotReg = data => {

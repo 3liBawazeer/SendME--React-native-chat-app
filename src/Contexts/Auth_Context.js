@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import React , {useEffect,useState,useContext,createContext} from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import {useNavigation} from "@react-navigation/native"
+import { logoutReq } from '../Requists';
 
 
 const authContext = createContext({})
@@ -31,8 +32,10 @@ const Auth_Context = ({children}) => {
      }
 
      const logout = async () => { 
-         await AsyncStorage.removeItem("user");
-         await AsyncStorage.removeItem("token");
+         await logoutReq(Token,userData?.phoneNumber).then(async()=>{
+            await AsyncStorage.removeItem("user");
+            await AsyncStorage.removeItem("token");
+         })
       }
 
     const saveloggedIn = async (data) => { 

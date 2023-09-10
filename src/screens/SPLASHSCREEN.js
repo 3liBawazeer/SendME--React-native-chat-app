@@ -1,16 +1,19 @@
 import React, {useState, useEffect} from 'react';
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, View,Text} from 'react-native';
 import {Icon, Button, Header} from '@rneui/themed';
 import LinearGradient from 'react-native-linear-gradient';
 import {useAuth} from '../Contexts/Auth_Context';
 import {socketIo, useSocket} from '../Contexts/Socket_context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useLocalDataBase} from '../Contexts/LocalDataBase';
+import { Image } from '@rneui/base';
+import { colors } from '../assets/colors';
 
 const SPLASHSCREEN = ({navigation}) => {
   const {isLoggedIn, userData, Token, setUserData, setToken} = useAuth();
   const {checkChatsAndMessages} = useLocalDataBase();
   const [CheckLoggedIn, setCheckLoggedIn] = useState(false);
+
 
   const checkUser = async () => {
     const user = await AsyncStorage.getItem('user');
@@ -25,22 +28,27 @@ const SPLASHSCREEN = ({navigation}) => {
   };
 
   useEffect(() => {
-    console.log(checkChatsAndMessages);
-    if (checkChatsAndMessages >= 3 && !CheckLoggedIn) {
+    if (checkChatsAndMessages >= 3 && !CheckLoggedIn  ) {
       setCheckLoggedIn(true);
       checkUser();
     }
   }, [checkChatsAndMessages]);
 
-  return (
+  return (<>
     <View style={styles.body}>
       <LinearGradient
-        colors={['#E6F4FE', '#E6F4FE', '#D4EEFF']}
+        colors={[colors.primary, colors.primary]}
         style={styles.linearGradient}>
-        <Icon name="message1" type="ant-design" size={50} color={'#3383BB'} />
+        <View  style={styles.linearGradient} >
+        <Image source={require("../assets/images/sendMe_fff.png")} style={{width:150,height:150,tintColor:colors.light,}} />
+        </View>
+        <View style={{marginBottom:15,padding:5,borderRadius:5}}>
+           <Text style={{color:colors.light,fontSize:10}} > Development by HadramSoft </Text>
+       </View>
       </LinearGradient>
     </View>
-  );
+    
+    </>);
 };
 
 export default SPLASHSCREEN;

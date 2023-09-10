@@ -2,6 +2,7 @@ apply plugin: "com.android.application"
 apply plugin: "com.google.gms.google-services" 
 apply plugin: "com.facebook.react"
 
+
 import com.android.build.OutputFile
 import org.apache.tools.ant.taskdefs.condition.Os
 
@@ -143,12 +144,12 @@ android {
     //         targetCompatibility JavaVersion.VERSION_1_8
     //     }
 
-    namespace "com.sendMe" // pay attention to the name 
+    namespace "com.hadramsoft.sendme" // pay attention to the name 
     
 
     defaultConfig {
         vectorDrawables.useSupportLibrary = true
-        applicationId "com.sendMe"
+        applicationId "com.hadramsoft.sendme"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -170,7 +171,7 @@ android {
                     cppFlags "-std=c++17"
                     // Make sure this target name is the same you specify inside the
                     // src/main/jni/Android.mk file for the `LOCAL_MODULE` variable.
-                    targets "chaty_appmodules"
+                    targets "sendme_appmodules"
                     // Fix for windows limit on number of character in file paths and in command lines
                     if (Os.isFamily(Os.FAMILY_WINDOWS)) {
                         arguments "NDK_APP_SHORT_COMMANDS=true"
@@ -276,9 +277,8 @@ android {
 dependencies {
 
  // Import the Firebase BoM
-    implementation platform('com.google.firebase:firebase-bom:30.3.2')
-    implementation 'com.google.firebase:firebase-analytics'
-    implementation 'com.google.firebase:firebase-core:16.0.1'
+    implementation(platform("com.google.firebase:firebase-bom:32.2.3"))
+    implementation("com.google.firebase:firebase-analytics")
     implementation 'com.google.firebase:firebase-auth'
 
     // TODO: Add the dependencies for Firebase products you want to use
@@ -290,7 +290,10 @@ dependencies {
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"  // From node_modules
 
+
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
+//  // Add this line here
+//     implementation platform('org.jetbrains.kotlin:kotlin-bom:1.8.0')
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
         exclude group:'com.facebook.fbjni'

@@ -24,6 +24,7 @@ import storage from '@react-native-firebase/storage';
 import LinearGradient from 'react-native-linear-gradient';
 import Lottie from 'lottie-react-native';
 import { useLocalDataBase } from '../../Contexts/LocalDataBase';
+import { colors } from '../../assets/colors';
 
 const EditProfile = ({navigation}) => {
   let animationRef = useRef(null);
@@ -155,7 +156,7 @@ const EditProfile = ({navigation}) => {
   return (
     <View style={{flex: 1, backgroundColor: '#fff'}}>
       <LinearGradient
-        colors={['#5B70F7', '#7F8CE9']}
+        colors={[colors.primary, colors.primary]}
         start={{x: 0, y: 0.5}}
         end={{x: 1, y: 0}}
         style={{

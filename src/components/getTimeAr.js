@@ -74,7 +74,6 @@ const GetDateLastMessages = ({date, item, index, messages}) => {
   
   let arr = [];
 
-  console.log(messages[0],"this is one message'");
 
   const LongTimeAgo = messages?.filter(item => {
     // let dat = new Date(JSON.parse(item.timestamp));
@@ -99,32 +98,31 @@ const GetDateLastMessages = ({date, item, index, messages}) => {
     return !find;
   });
   
-  console.log(yester,"hellodjnf ksbdskfhskldshdkwdjfegf klsfh");
   
   if (today?.id == item?.id) {
     return (
       <View
-        style={{alignItems: 'center', justifyContent: 'center', margin: 10}}>
-        <View style={{backgroundColor: colors.secondry+88, padding: 7, borderRadius: 10}}>
-          <Text style={{color: colors.typograf}}> اليوم </Text>
+        style={{alignItems: 'center', justifyContent: 'center', margin: 10,}}>
+        <View style={{padding: 7, borderRadius: 50,paddingHorizontal:20,}}>
+          <Text style={{color: colors.secondry,fontWeight:"bold",borderWidth:1,borderColor:colors.secondry,paddingHorizontal:20,borderRadius:10}}> اليوم </Text>
         </View>
       </View>
     );
   } else if (yester?.id == item?.id) {
     return (
       <View
-        style={{alignItems: 'center', justifyContent: 'center', margin: 10}}>
-        <View style={{backgroundColor: colors.secondry+88, padding: 7, borderRadius: 10}}>
-          <Text style={{color: colors.typograf}}> أمس </Text>
+        style={{alignItems: 'center', justifyContent: 'center', margin: 10,}}>
+        <View style={{padding: 7, borderRadius: 50,paddingHorizontal:20,}}>
+          <Text style={{color: colors.secondry,fontWeight:"bold",borderBottomWidth:1}}> أمس </Text>
         </View>
       </View>
     );
   } else if (LongTimeAgo?.includes(item)) {
     return (
       <View
-        style={{alignItems: 'center', justifyContent: 'center', margin: 10}}>
-        <View style={{backgroundColor: colors.secondry+88, padding: 7, borderRadius: 10}}>
-          <Text style={{color: colors.typograf}}>
+        style={{alignItems: 'center', justifyContent: 'center', margin: 10,}}>
+        <View style={{padding: 7, borderRadius: 50,paddingHorizontal:20,}}>
+          <Text style={{color: colors.secondry,fontWeight:"bold",borderBottomWidth:1}}>
             {enToAr(getDate(JSON.parse(item.timestamp)).date)}
           </Text>
         </View>

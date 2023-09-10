@@ -1,4 +1,4 @@
-package com.sendMe.newarchitecture;
+package com.hadramsoft.sendme.newarchitecture;
 
 import android.app.Application;
 import androidx.annotation.NonNull;
@@ -19,9 +19,9 @@ import com.facebook.react.fabric.CoreComponentsRegistry;
 import com.facebook.react.fabric.EmptyReactNativeConfig;
 import com.facebook.react.fabric.FabricJSIModuleProvider;
 import com.facebook.react.uimanager.ViewManagerRegistry;
-import com.sendMe.BuildConfig;
-import com.sendMe.newarchitecture.components.MainComponentsRegistry;
-import com.sendMe.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
+import com.hadramsoft.sendme.BuildConfig;
+import com.hadramsoft.sendme.newarchitecture.components.MainComponentsRegistry;
+import com.hadramsoft.sendme.newarchitecture.modules.MainApplicationTurboModuleManagerDelegate;
 import java.util.ArrayList;
 import java.util.List;
 

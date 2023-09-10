@@ -1,4 +1,4 @@
-export const BACK_END_URL = "http://192.168.1.102:5001";
+export const BACK_END_URL = "http://192.168.1.104:5001";
 import axios from "axios";
 
     export const signUp = (data) => { 
@@ -18,6 +18,21 @@ import axios from "axios";
     })
     return fun;
     }
+
+    export const logoutReq = (token,data) => { 
+        const fun = new Promise((resolve,rej)=>{
+        axios.post(BACK_END_URL + "/auth/logout",{phoneNumber:data},{
+            headers: {
+                'auth_token_jwt': token ,
+                'Accept' : 'application/json',
+                'Content-Type': 'application/json'
+                }
+        }).then((res)=>{
+            resolve(res)
+        }).catch((err)=>rej(err))
+        })
+        return fun;
+        }
 
     export const getMyContactsInSendMe = (token,data) => { 
         const fun = new Promise((resolve,rej)=>{

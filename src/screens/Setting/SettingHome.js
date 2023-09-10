@@ -9,6 +9,7 @@ import {useAuth} from '../../Contexts/Auth_Context';
 import { useLocalDataBase } from '../../Contexts/LocalDataBase';
 import { deleteAccount } from '../../Requists';
 import Lottie from 'lottie-react-native';
+import { colors } from '../../assets/colors';
 const SettingHome = ({navigation}) => {
 
   let animationRef = useRef(null);
@@ -97,32 +98,7 @@ const SettingHome = ({navigation}) => {
   ];
 
   const DATA = [
-    // {
-    //   title: 'الإعدادات',
-    //   data: [
-    //     {
-    //       title: 'الملف الشخصي',
-    //       iconName: 'ios-american-football',
-    //       iconType: 'ionicon',
-    //     },
-    //     {
-    //       title: 'الصفحه الرئيسيه',
-    //       iconName: 'ios-american-football',
-    //       iconType: 'ionicon',
-    //     },
-    //     {
-    //       title: 'الديكور',
-    //       iconName: 'ios-american-football',
-    //       iconType: 'ionicon',
-    //     },
-    //   ],
-    // },
-
-
-
-
-
-    // this is the last setting 
+  
     {
         title: 'إعدادت الحساب',
         data: [
@@ -198,7 +174,7 @@ const SettingHome = ({navigation}) => {
       <Icon
         name={item.iconName}
         type={item.iconType}
-        color="#517fa4"
+        color={colors.secondry}
         style={{padding: 5, marginHorizontal: 10,width:45,alignItems:"center",justifyContent:'center'}}
       />
       <Text style={styles.title}>{item.title}</Text>
@@ -206,9 +182,9 @@ const SettingHome = ({navigation}) => {
   );
 
   return (<>
-    <View style={{flex: 1, backgroundColor: '#eff'}}>
+    <View style={{flex: 1, backgroundColor: colors.light}}>
       <LinearGradient
-        colors={['#5B70F7', '#7F8CE9']}
+        colors={[colors.primary, colors.primary]}
         start={{x: 0, y: 0}}
         end={{x: 1, y: 0}}>
         <View
@@ -232,7 +208,7 @@ const SettingHome = ({navigation}) => {
               borderRadius: 100,
               borderColor: '#fff',
               borderWidth: 0,
-              backgroundColor: '#fff2',
+              backgroundColor: colors.light,
               marginBottom: 0,
             }}
           />
@@ -356,6 +332,6 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    color: '#005',
+    color: colors.typograf,
   },
 });
