@@ -153,7 +153,7 @@ const PhoneVerifcation = ({navigation}) => {
     setverLoading(true);
     try {
       const aa = await confirm.confirm(code);
-      console.log(aa);
+      // console.log(aa);
 
       if (aa) {
         const fcmToken = await messageing().getToken();
@@ -184,7 +184,7 @@ const PhoneVerifcation = ({navigation}) => {
           });
       }else{
         setverLoading(false);
-        console.log(aa);
+        // console.log(aa);
       }
 
     } catch (error) {
@@ -384,8 +384,9 @@ const PhoneVerifcation = ({navigation}) => {
                     <View style={{alignItems: 'center'}}>
                        <Input 
                         value={code}
-                        placeholder="* * * * * *"
+                        placeholder=" *  *  *  *  *  * "
                         onChangeText={(t)=>setCode(t)}
+                        keyboardType='phone-pad'
                         onSubmitEditing={()=>{ 
                           if (code == "") {
                           Alert.alert("!","أدخل رمز التحقق")

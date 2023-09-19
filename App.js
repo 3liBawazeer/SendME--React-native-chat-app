@@ -7,38 +7,18 @@ import Socket_context from './src/Contexts/Socket_context';
 import LocalDataBase from './src/Contexts/LocalDataBase';
 import Call_Context from './src/Contexts/Call_Context';
 import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
-
-
+import { MenuProvider } from 'react-native-popup-menu';
+import messaging from '@react-native-firebase/messaging';
+import Toast from 'react-native-toast-message';
 const App = () => {
 
   useEffect(() => {
-    // const subscribe = notifee.onForegroundEvent(({ type, detail }) => {
-    //   const { notification, pressAction,input } = detail;
-  
-    //   if (type === EventType.ACTION_PRESS && pressAction.id !="" ) {
-    //      switch (pressAction?.id) {
-    //       case "reply":
-    //         if (detail?.notification?.data) {
-    //           // sendMessage(input,detail?.notification?.data)
-    //           console.log(input,detail?.notification?.data,"<><>".repeat(100));
-    //         }
-    //         break;
-         
-    //       default:
-    //         break;
-    //      }
-    //     }
-        
-  
-    //   });
-  
     return () => {
-      // subscribe()
     }
   }, [])
 
-  return (
-    
+  return (<>
+    <MenuProvider>
     <NavigationContainer>
 
             <LocalDataBase>
@@ -60,7 +40,9 @@ const App = () => {
           </LocalDataBase>
           
     </NavigationContainer>
-  );
+    </MenuProvider>
+    <Toast/>
+  </>);
 };
 
 export default App;

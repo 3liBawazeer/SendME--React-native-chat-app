@@ -23,10 +23,10 @@ const HomeView = ({
   OnlineUsers,
 }) => {
   const getLastMessage = chatId => {
-    const filterMesg = AllMessages.filter(it => chatId == it.chat);
-    const index = filterMesg.length - 1;
+    const filterMesg = AllMessages?.filter(it => chatId == it.chat);
+    const index = filterMesg?.length - 1;
     const lastMesg = filterMesg[index];
-    return lastMesg;
+    return lastMesg || "8828";
   };
   // let noread;
   // const notRead = (item) => {
@@ -41,6 +41,7 @@ const HomeView = ({
       <FlatList
         //  data={["1","2","3"]}
         data={LastChats}
+        
         contentContainerStyle={{flex:LastChats.length == 0 ? 1 :0}}
         ListEmptyComponent={
            <View style={{flex:1,alignItems:"center",justifyContent:'center'}} >
@@ -50,7 +51,11 @@ const HomeView = ({
              </View>
           </View>
         }
-        renderItem={({item}) => (
+        
+        renderItem={({item,index}) => {
+          const senderlastMessage = JSON.parse(getLastMessage(item?.chat)?.sender)
+       return (<>
+          
           <TouchableOpacity
             style={styles.listbody}
             onPress={() => {
@@ -90,7 +95,7 @@ const HomeView = ({
               <View style={{marginHorizontal: 7,alignItems:"flex-start",justifyContent:"center"}}>
                 <Text style={styles.name}>{item?.friendData?.username}</Text>
                 <Text style={styles.last} numberOfLines={1}>
-                  {JSON.parse(getLastMessage(item?.chat)?.sender)?.id == userData?._id ? `انت : ${getLastMessage(item?.chat)?.content}` : getLastMessage(item?.chat)?.content}
+                  { (senderlastMessage && !!(userData?._id) )&& ( (senderlastMessage?.id) == userData?._id) ? `انت : ${getLastMessage(item?.chat)?.content}` : getLastMessage(item?.chat)?.content}
                 </Text>
               </View>
 
@@ -98,10 +103,10 @@ const HomeView = ({
 
             <View style={{alignItems: 'center', justifyContent: 'space-between',marginHorizontal:10}}>
             <Text style={{fontSize:10}}>
-                {formatDate(JSON.parse(getLastMessage(item?.chat)?.timestamp))}
+                {getLastMessage(item?.chat)?.timestamp && formatDate(+(JSON.parse(getLastMessage(item?.chat)?.timestamp)))}
                 {/* 20 */}
             </Text>
-              {MessagesNotRead?.filter(ite => ite.chat == item?.chat).length !==
+              {MessagesNotRead?.filter(ite => (ite.chat == item?.chat) && (JSON.parse(ite.sender).id != userData?._id) ).length !==
                 0 && (
                 <Text
                   style={{
@@ -129,7 +134,7 @@ const HomeView = ({
             </Text>
             </View>
           </TouchableOpacity>
-        )}
+        </>)}}
       />
     </View>
   );

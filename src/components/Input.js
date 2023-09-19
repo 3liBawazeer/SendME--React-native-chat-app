@@ -91,7 +91,7 @@ const Input = ({
                 <Icon name={icn1} type={ict1}  color={icc1} size={ics1} onPress={onPressic1} style={{padding:5}} containerStyle={{borderRadius:50}} />
                </View>} 
 
-            <View style={{width: !ic2&&!ic1? '100%' : ic1  ?'80%':'90%',height:multH}}>
+            <View style={{width: !ic2&&!ic1? '100%' : ic1  ?'80%':'90%',height:multH,maxHeight:150}}>
               <TextInput 
                 onPressIn={onPressIn}
                 onPressOut={onPressOut}
@@ -101,6 +101,8 @@ const Input = ({
                 autoFocus={autoFocus}
                 onFocus={onFocus}
                 onChangeText={onChangeText}
+                // numberOfLines={10}
+
                 value={value}
                 ref={focusINputRef}
                 onBlur={onBlur}

@@ -11,7 +11,7 @@ const db = SQLite.openDatabase(
     // console.log('OPEN DB [ ChatyDB ] SUCCFULY :::::) ');
   },
   err => {
-    console.log('OPEN DB [ ChatyDB ] ERROR :::::( ', err.message);
+    // console.log('OPEN DB [ ChatyDB ] ERROR :::::( ', err.message);
   },
 );
 
@@ -34,6 +34,7 @@ const LocalDataBase = ({children}) => {
   const [contactsNotReg, setcontactsNotReg] = useState([]);
 
   const [checkChatsAndMessages, setcheckChatsAndMessages] = useState(0);
+  const [loadCreatTables, setloadCreatTables] = useState(false)
 
   // select count(*) from employee | for check
 
@@ -114,7 +115,7 @@ const LocalDataBase = ({children}) => {
                `SELECT * FROM ${TablesName.contactsLive}`,
               [],
               (tx, res) => {
-                console.log(res.rows , "this is res from count(*)");
+                // console.log(res.rows , "this is res from count(*)");
                 if (res.rows.length == 0) {
                   resolve("add")
                 }else if(res.rows.length > 0){
@@ -180,7 +181,7 @@ const LocalDataBase = ({children}) => {
             resolve('SAVE NEW CHAT SUCCEFULY >>>');
             getLastChats();
           },
-          err => reject(err),
+          err =>{ reject(err);console.log("error : on saveLastChat =>  ",err);},
         );
       });
     });
@@ -214,7 +215,7 @@ const LocalDataBase = ({children}) => {
 
   const saveContactsLive = async (data) => {
     const numbers = JSON.stringify(data);
-    console.log(numbers);
+    // console.log(numbers);
     // checkTables(TablesName.contactsLive).then((ch)=>{
       
         db.transaction(tx => {
@@ -225,7 +226,7 @@ const LocalDataBase = ({children}) => {
             [numbers,1],
             (x, result) => {
               getcontactsLive()
-              console.log(" update SAVE CONTACTS live SUCCESFLUY c0000n74c7");
+              // console.log(" update SAVE CONTACTS live SUCCESFLUY c0000n74c7");
             },
             err => {
               console.log(' ERROR ON Change isRead to true :( ', err.message);
@@ -313,7 +314,7 @@ const LocalDataBase = ({children}) => {
               }
               setcheckChatsAndMessages(o => o + 1);
               setLastChats(last);
-              console.log(last);
+              // console.log(last);
               resolve(last);
             } else {
               //  console.log("NOT FOUND IN CHAT IN THE LAST MOMMENT ...");
@@ -335,7 +336,7 @@ const LocalDataBase = ({children}) => {
   const getMessagesNotRead = () => {
     db.transaction(tx => {
       tx.executeSql(
-        `SELECT * FROM Messages WHERE isRead == ${'0'}`,
+        `SELECT * FROM Messages WHERE isRead = 0 OR isRead = 1`,
         [],
         (x, result) => {
           let len = result.rows.length;
@@ -345,11 +346,7 @@ const LocalDataBase = ({children}) => {
               mesg.push(result.rows.item(i));
             }
             setMessagesNotRead(mesg);
-            // console.log(
-            //   'Messages not read ',
-            //   mesg,
-            //   '|/*************************',
-            // );
+          
           } else {
             setMessagesNotRead([]);
             // console.log(
@@ -373,9 +370,9 @@ const LocalDataBase = ({children}) => {
           [],
           (x, result) => {
             let len = result.rows.length
-            console.log(result.rows.length ," lklklklkl");
+            // console.log(result.rows.length ," lklklklkl");
             if (len == 0) {
-                console.log("GET CONTACTS LIVE SUCCESFLU length == 0");
+                // console.log("GET CONTACTS LIVE SUCCESFLU length == 0");
                 setcheckChatsAndMessages(o => o + 1);
                 setcontactsLive([]);
                 resolve([])
@@ -455,7 +452,7 @@ const LocalDataBase = ({children}) => {
       await db.transaction(tx => {
         tx.executeSql(`DELETE FROM ${TablesName.contactsNoteReg}`);
       });
-      console.log('DATABASE DELETED SUCCESFUl');
+      // console.log('DATABASE DELETED SUCCESFUl');
       setAllMessages([]);
       setLastChats([]);
       setMessagesNotRead([]);
@@ -465,13 +462,13 @@ const LocalDataBase = ({children}) => {
   };
 
   const checkIsRead = chatId => {
-    console.log(chatId);
+    // console.log(chatId);
     db.transaction(tx => {
       tx.executeSql(
         `UPDATE ${TablesName.message} SET isRead = 1 WHERE chat == ${JSON.stringify(chatId)}`,
         [],
         (x, result) => {
-          console.log('Change isRead to true Succfuly . ):');
+          // console.log('Change isRead to true Succfuly . ):');
           getMessagesNotRead();
         },
         err => {
@@ -479,6 +476,50 @@ const LocalDataBase = ({children}) => {
         },
       );
     });
+  };
+
+  const updateMultipleMessages = async (messageIds, newContent) => {
+    const updateQuery = `UPDATE messages SET content = ? WHERE id IN (${messageIds.join(',')})`;
+    
+    try {
+      await db.transaction(async (transaction) => {
+        await transaction.executeSql(updateQuery, [newContent]);
+      });
+  
+      console.log('تم تعديل الرسائل بنجاح');
+    } catch (error) {
+      console.error('حدث خطأ أثناء تعديل الرسائل:', error);
+    }
+  };
+
+  const changeMessageStatus = async (messageIds,status) => {
+   if (messageIds.length != 0) {
+      try {
+        await messageIds.map( async (item)=>{
+          console.log(JSON.parse(JSON.stringify(item)));
+           const updateQuery = `UPDATE ${TablesName.message} SET isRead = ${status} WHERE id == ${JSON.stringify(item)}`;
+          await db.transaction(tx => {
+             tx.executeSql(
+               updateQuery,
+               [],
+               (x, result) => {
+                 console.log(`Change isRead to ${status} Succfuly . ):`);
+                 getAllMessages()
+                 getMessagesNotRead()
+               },
+               err => {
+                 console.log(' ERROR ON Change isRead to true :( ', err,status);
+               },
+             );
+           });
+         })
+         return true
+      } catch (error) {
+        return false
+      }
+   }else{
+    return false
+   }
   };
 
   return (
@@ -504,6 +545,7 @@ const LocalDataBase = ({children}) => {
         contactsNotReg,
         setcontactsLive,
         setcontactsNotReg,
+        changeMessageStatus,
       }}>
       {children}
     </DataBaseContext.Provider>

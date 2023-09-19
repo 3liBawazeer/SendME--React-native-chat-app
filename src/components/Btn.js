@@ -2,6 +2,7 @@ import { StyleSheet, Text, View ,TouchableOpacity, ActivityIndicator} from 'reac
 import React from 'react'
 import LinearGradient from 'react-native-linear-gradient'
 import { Icon } from '@rneui/themed'
+import { colors } from '../assets/colors'
 const Btn = ({
 loading = false,
 title = "التالي",
@@ -14,7 +15,7 @@ icon = {name:'chevron-small-right',type:'entypo'}
                 onPress={onPress}
             >
         <LinearGradient 
-            colors={['#7207c4', '#974ECF']} 
+            colors={[colors.primary, colors.primary]} 
             end={{x:0.1,y:1}}
             style={styles.btn}
             >

@@ -36,7 +36,7 @@ const LocalStorage = () => {
                 "CREATE TABLE IF NOT EXISTS Messages(ID INTEGER PRIMARY KEY AUTOINCREMENT, content TEXT , sender TEXT , chat TEXT ,timestamp INTEGER)",
                 [],
                 ()=>{
-                    console.log("create table successfuly ...");
+                    // console.log("create table successfuly ...");
                 },
                 err => console.log(err)
             )

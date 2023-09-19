@@ -21,6 +21,7 @@ import Input from '../../components/Input';
 import storage from '@react-native-firebase/storage';
 import LinearGradient from 'react-native-linear-gradient';
 import Lottie from 'lottie-react-native';
+import { colors } from '../../assets/colors';
 
 const SignIn = ({navigation, route}) => {
 
@@ -130,7 +131,7 @@ const SignIn = ({navigation, route}) => {
       cropperCircleOverlay:true
     }).then(image => {
       setImageSelected(image.path);
-    });
+    }).catch(()=>{})
   };
 
   return (
@@ -179,9 +180,9 @@ const SignIn = ({navigation, route}) => {
                 name="camera-plus-outline"
                 type="material-community"
                 size={50}
-                color="#08d"
+                color={colors.primary}
               />
-              <Text style={{fontSize: 16, fontWeight: 'bold', color: '#08d'}}>
+              <Text style={{fontSize: 16, fontWeight: 'bold', color: colors.primary}}>
                 أضف صورتك
               </Text>
             </>
@@ -198,7 +199,7 @@ const SignIn = ({navigation, route}) => {
         <View style={{alignItems: 'center', margin: 40, marginBottom: 0}}>
           <Input
             ic2
-            icc2={'#5274E9'}
+            icc2={colors.secondry}
             icn2="person"
             ict2="fontisto"
             placeholder="أدخل إسمك"
@@ -250,7 +251,7 @@ const SignIn = ({navigation, route}) => {
                 autoPlay
                 style={{height:50,}}
               />
-               <Text style={{color:"#07d",fontSize:17}}> جارِ الرفع يرجى الإنتظار ... </Text>
+               <Text style={{color:colors.primary,fontSize:17}}> جارِ التهيئة يرجى الإنتظار ... </Text>
           </View>
 
 

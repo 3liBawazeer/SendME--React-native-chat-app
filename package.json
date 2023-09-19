@@ -13,6 +13,7 @@
     "@notifee/react-native": "^7.8.0",
     "@react-native-async-storage/async-storage": "^1.17.7",
     "@react-native-clipboard/clipboard": "^1.10.0",
+    "@react-native-community/netinfo": "^9.4.1",
     "@react-native-firebase/app": "^18.3.2",
     "@react-native-firebase/auth": "^18.3.2",
     "@react-native-firebase/messaging": "^18.3.2",
@@ -22,6 +23,7 @@
     "@react-navigation/stack": "^6.3.17",
     "@rneui/base": "github:react-native-elements/react-native-elements#base",
     "@rneui/themed": "github:react-native-elements/react-native-elements#themed",
+    "@shopify/flash-list": "^1.6.1",
     "axios": "^0.27.2",
     "lottie-react-native": "^5.1.4",
     "moment": "^2.29.4",
@@ -44,8 +46,10 @@
     "react-native-sqlite-storage": "^6.0.1",
     "react-native-step-indicator": "^1.0.3",
     "react-native-swiper": "^1.6.0",
+    "react-native-toast-message": "^2.1.6",
     "react-native-uuid": "^2.0.1",
     "react-native-vector-icons": "^9.2.0",
+    "rn-emoji-keyboard": "^1.5.1",
     "socket.io-client": "^4.5.1"
   },
   "devDependencies": {

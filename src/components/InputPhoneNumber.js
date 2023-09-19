@@ -32,7 +32,7 @@ const InputPhoneNumber = ({
 
     
     const onSelect = (country) => {
-        console.log("+"+country.callingCode[0]);
+        // console.log("+"+country.callingCode[0]);
         setCountryKey("+"+country.callingCode[0])
         onSelectKey(`+${country.callingCode[0]}`)
         setshowMDL(false)

@@ -6,61 +6,71 @@ import {StatusBar} from 'react-native';
 import {View, StyleSheet, ScrollView, Image, Text} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {useAuth} from '../../Contexts/Auth_Context';
-import { useLocalDataBase } from '../../Contexts/LocalDataBase';
-import { deleteAccount } from '../../Requists';
+import {useLocalDataBase} from '../../Contexts/LocalDataBase';
+import {deleteAccount} from '../../Requists';
 import Lottie from 'lottie-react-native';
-import { colors } from '../../assets/colors';
+import {colors} from '../../assets/colors';
+import AlertLoading from '../../components/AlertLoading';
+import AlertDialog from '../../components/AlertDialog';
 const SettingHome = ({navigation}) => {
-
   let animationRef = useRef(null);
 
   useEffect(() => {
     animationRef.current?.play(30, 120);
-    return () => {
-      
-    }
+    return () => {};
   }, []);
 
-
   const STATUSBAR_HEIGHT = StatusBar.currentHeight;
-  const {saveloggedIn, userData, Token,logout} = useAuth();
+  const {saveloggedIn, userData, Token, logout} = useAuth();
   const {RemoveAllData} = useLocalDataBase();
-  const [loadDeleteAcount, setloadDeleteAcount] = useState(false)
+  const [loadDeleteAcount, setloadDeleteAcount] = useState(false);
+  const [logoutLoading, setlogoutLoading] = useState(false);
+  const [showAlertDialog, setshowAlertDialog] = useState(false)
+const [showAlertDeleteAccount, setshowAlertDeleteAccount] = useState(false)
+  const logOut = async (del=false) => {
+    await logout(() => {}).then(() => {
+      RemoveAllData().then(() => {
+        setlogoutLoading(false);
+        if (!del) {
+          (navigation.replace('phone'));
+        }
+       
+      });
+    });
+  };
 
+  const DelAccount = id => {
 
-  const logOut = async () => { 
-   await logout().then(()=>{
-      RemoveAllData().then(()=>{
-        navigation.replace("phone")
-        console.log("logout and delete data succefluy");
+    setloadDeleteAcount(true);
+    setshowAlertDeleteAccount(false)
+    if (id) {
+      const dara = {id: id, token: Token};
+      // console.log(dara);
+      logOut("del")
+      .then(() => {
+      deleteAccount(dara)
+        .then(() => {
+         
+              // console.log('لقد تم حذف الحساب بنجاح');
+              setloadDeleteAcount(false);
+              setshowAlertDeleteAccount(false);
+              (navigation.replace('phone'));
+            
+        })
+        .catch(err => {
+          console.log(err);
+          setshowAlertDeleteAccount(false);
+          setloadDeleteAcount(false);
+          Alert.alert('حدث خطأ أثناْ حذف الحساب');
+        });
       })
-    })
-   }
-
-   const DelAccount = (id) => { 
-    setloadDeleteAcount(true)
-     if (id) {
-      const dara = {id:id,token:Token}
-
-       deleteAccount(dara).then(()=>{
-
-        logOut().then(()=>{
-
-          console.log("لقد تم حذف الحساب بنجاح");
-          setloadDeleteAcount(false)
-
-        }).catch((err)=>console.log(err))
-
-       }).catch((err)=>{
-        console.log(err)
-        setloadDeleteAcount(false)
-        Alert.alert("حدث خطأ أثناْ حذف الحساب")
-       })
-     }else{
-      setloadDeleteAcount(false)
-      Alert.alert("حدث خطأ أثناْ حذف الحساب")
-     }
+      .catch(err => {console.log(err);setshowAlertDeleteAccount(false);});
+    } else {
+      setloadDeleteAcount(false);
+      
+      Alert.alert('حدث خطأ أثناْ حذف الحساب');
     }
+  };
 
   const list2 = [
     {
@@ -98,44 +108,44 @@ const SettingHome = ({navigation}) => {
   ];
 
   const DATA = [
-  
     {
-        title: 'إعدادت الحساب',
-        data: [
-            {
-                title: 'الملف الشخصي',
-                iconName: 'person',
-                iconType: 'fontisto',
-                onPress:()=>{navigation.navigate("EditProfile")}
-              },
-          {
-            title: 'تسجيل الخروج',
-            iconName: 'log-out',
-            iconType: 'feather',
-            onPress:()=>{Alert.alert("تنبيه !","هل تريد تسجيل الخروج؟ سيتم حذف جميع الدردشات والرسائل!",
-            [
-              {text:"نعم",onPress:()=>logOut()},
-              {text:"تراجع"}
-            ])}
+      title: 'إعدادت الحساب',
+      data: [
+        {
+          title: 'الملف الشخصي',
+          iconName: 'person',
+          iconType: 'fontisto',
+          onPress: () => {
+            navigation.navigate('EditProfile');
           },
-          {
-            title: 'حذف الحساب',
-            iconName: 'deleteuser',
-            iconType: 'ant-design',
-            onPress:()=>{Alert.alert("تنبيه !","هل تريد حذف هذا الحساب نهائياً!؟!",
-            [
-              {text:"نعم",onPress:()=>DelAccount(userData._id)},
-              {text:"تراجع"}
-            ])}
+        },
+        {
+          title: 'تسجيل الخروج',
+          iconName: 'log-out',
+          iconType: 'feather',
+          onPress: () => {
+            setshowAlertDialog(true)
           },
-        ],
-      },
+        },
+        {
+          title: 'حذف الحساب',
+          iconName: 'deleteuser',
+          iconType: 'ant-design',
+          onPress: () => {
+            setshowAlertDeleteAccount(true);
+            // Alert.alert('تنبيه !', 'هل تريد حذف هذا الحساب نهائياً!؟!', [
+            //   {text: 'نعم', onPress: () => DelAccount(userData._id)},
+            //   {text: 'تراجع'},
+            // ]);
+          },
+        },
+      ],
+    },
   ];
-
 
   const editProfile = async () => {
     setloading(true);
-    setuploadLoading(true)
+    setuploadLoading(true);
     try {
       // save image in firebase storage
       const reference = storage().ref(
@@ -143,94 +153,146 @@ const SettingHome = ({navigation}) => {
       );
       await reference.putFile(ImageSelected);
 
-    //   get uri image from firebase storage
-    const image = await storage().ref(`usersImgaes/${userData.phoneNumber}-profile.png`).getDownloadURL();
+      //   get uri image from firebase storage
+      const image = await storage()
+        .ref(`usersImgaes/${userData.phoneNumber}-profile.png`)
+        .getDownloadURL();
       if (image) {
-        editProfile({phoneNumber, username , image}, data.res.token)
-        .then(dat => {
-          const allData = {
-            res: {user: dat.data.res.user, token: data.res.token},
-          };
-          console.log(allData);
-          saveloggedIn(allData);
-          navigation.replace('home');
-        })
-        .catch(err =>{
+        editProfile({phoneNumber, username, image}, data.res.token)
+          .then(dat => {
+            const allData = {
+              res: {user: dat.data.res.user, token: data.res.token},
+            };
+            // console.log(allData);
+            saveloggedIn(allData);
+            navigation.replace('home');
+          })
+          .catch(err => {
             setloading(false);
-            setuploadLoading(false)
-            console.log(err.response)
-        });
+            setuploadLoading(false);
+            console.log(err.response);
+          });
       }
       setloading(false);
-      setuploadLoading(false)
+      setuploadLoading(false);
     } catch (error) {
-      setuploadLoading(false)
+      setuploadLoading(false);
       console.log(error);
     }
   };
 
-  const Item = ({item}) => (        
+  const Item = ({item}) => (
     <TouchableOpacity onPress={item.onPress} style={styles.item}>
       <Icon
         name={item.iconName}
         type={item.iconType}
         color={colors.secondry}
-        style={{padding: 5, marginHorizontal: 10,width:45,alignItems:"center",justifyContent:'center'}}
+        style={{
+          padding: 5,
+          marginHorizontal: 10,
+          width: 45,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
       />
       <Text style={styles.title}>{item.title}</Text>
     </TouchableOpacity>
   );
 
-  return (<>
-    <View style={{flex: 1, backgroundColor: colors.light}}>
-      <LinearGradient
-        colors={[colors.primary, colors.primary]}
-        start={{x: 0, y: 0}}
-        end={{x: 1, y: 0}}>
-        <View
-          style={{
-            paddingTop: STATUSBAR_HEIGHT + 10,
-            alignItems: 'center',
-            flexDirection:"row",
-            padding:10,
-            paddingBottom:10
-          }}>
-          <Image
-            source={
-              userData.image == 'image-user.png' || userData.image == ""
-                ? require('../../assets/images/user-image.png')
-                : {uri: userData.image}
-            }
-            style={{
-              width: 50,
-              height: 50,
-              margin: 5,
-              borderRadius: 100,
-              borderColor: '#fff',
-              borderWidth: 0,
-              backgroundColor: colors.light,
-              marginBottom: 0,
-            }}
-          />
+  return (
+    <>
+      {/* logout */}
+      <AlertDialog
+        data={{
+          title: 'تسجيل الخروج',
+          body: 'هل تريد تسجيل الخروج؟ سيتم حذف جميع الدردشات والرسائل!',
+          visible: showAlertDialog,
+        }}
+        btns={{
+          acceptBtnPress:() => {
+                    logOut();
+                    setlogoutLoading(true);
+                    setshowAlertDialog(false);
+                  },
+          rejectBtnPress:()=>{setshowAlertDialog(false);console.log("dd");},
+          acceptBtnTitle:"نعم",
+          rejectBtnTitle:"تراجع"
+        }}
+      />
+
+      <AlertDialog
+        data={{
+          title: 'تنبيه',
+          body: 'هل تريد حذف الحساب نهائيا؟ سيتم حذف جميع البينات المتعلقة بهذا الحساب !',
+          visible: showAlertDeleteAccount,
+          type:"danger"
+        }}
+        btns={{
+          acceptBtnPress:() => {
+                    DelAccount(userData._id)
+                    
+                  },
+          rejectBtnPress:()=>{setshowAlertDeleteAccount(false);},
+          acceptBtnTitle:"نعم",
+          rejectBtnTitle:"تراجع"
+        }}
+      />
+      <AlertLoading loading={logoutLoading||loadDeleteAcount} title={loadDeleteAcount?"جاري حذف الحساب":"جاري تسجيل الخروج"} />
+      <View style={{flex: 1, backgroundColor: colors.light}}>
+        <LinearGradient
+          colors={[colors.primary, colors.primary]}
+          start={{x: 0, y: 0}}
+          end={{x: 1, y: 0}}>
           <View
             style={{
+              paddingTop: STATUSBAR_HEIGHT + 10,
               alignItems: 'center',
-            //   margin: 5,
-            //   marginVertical: 10,
-              marginBottom: 0,
-            //   marginTop:10
+              flexDirection: 'row',
+              padding: 10,
+              paddingBottom: 10,
             }}>
-            <Text style={{color: '#fff', fontSize: 20,fontWeight:'600',marginBottom:0}}>
-              {' '}
-              {userData.username}{' '}
-            </Text>
-            <Text style={{color: '#fff'}}>
-              {' '}
-              {userData.countryKey + ' ' + userData.phoneNumber}{' '}
-            </Text>
-          </View>
+            <Image
+              source={
+                userData.image == 'image-user.png' || userData.image == ''
+                  ? require('../../assets/images/user-image.png')
+                  : {uri: userData.image}
+              }
+              style={{
+                width: 50,
+                height: 50,
+                margin: 5,
+                borderRadius: 100,
+                borderColor: '#fff',
+                borderWidth: 0,
+                backgroundColor: colors.light,
+                marginBottom: 0,
+              }}
+            />
+            <View
+              style={{
+                alignItems: 'center',
+                //   margin: 5,
+                //   marginVertical: 10,
+                marginBottom: 0,
+                //   marginTop:10
+              }}>
+              <Text
+                style={{
+                  color: '#fff',
+                  fontSize: 20,
+                  fontWeight: '600',
+                  marginBottom: 0,
+                }}>
+                {' '}
+                {userData.username}{' '}
+              </Text>
+              <Text style={{color: '#fff'}}>
+                {' '}
+                {userData.countryKey + ' ' + userData.phoneNumber}{' '}
+              </Text>
+            </View>
 
-          {/* <TouchableOpacity
+            {/* <TouchableOpacity
           onPress={()=>{navigation.navigate("EditProfile")}}
           style={styles.btnEdit}>
             <Text
@@ -247,45 +309,46 @@ const SettingHome = ({navigation}) => {
               color="rgba(78, 116, 289, 1)"
             />
           </TouchableOpacity> */}
-        </View>
-
-        <View style={styles.bodySetting}>
-          <SectionList
-            sections={DATA}
-            keyExtractor={(item, index) => item + index}
-            renderItem={({item}) => <Item item={item} />}
-            renderSectionHeader={({section: {title}}) => (
-              <Text style={styles.header}>{title}</Text>
-            )}
-          />
-        </View>
-      </LinearGradient>
-    </View>
-    <Modal visible={loadDeleteAcount} transparent animationType='fade' >
-      <View 
-        style={{
-          flex:1,
-          alignItems:"center",
-          justifyContent:'center',
-          backgroundColor:"#0003"
-        }} >
-
-          <View style={{backgroundColor:"#fff",borderRadius:10, alignItems:"center",
-          justifyContent:'center',}} >
-             
-            <Lottie
-                  ref={animationRef}
-                  source={require('../../assets/lottie/loading.json')}
-                  autoPlay
-                  style={{height: 100}}
-                />
-
-
           </View>
 
+          <View style={styles.bodySetting}>
+            <SectionList
+              sections={DATA}
+              keyExtractor={(item, index) => item + index}
+              renderItem={({item}) => <Item item={item} />}
+              renderSectionHeader={({section: {title}}) => (
+                <Text style={styles.header}>{title}</Text>
+              )}
+            />
+          </View>
+        </LinearGradient>
       </View>
-    </Modal>
-    </>);
+      {/* <Modal visible={loadDeleteAcount} transparent animationType="fade">
+        <View
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#0003',
+          }}>
+          <View
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: 10,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+            <Lottie
+              ref={animationRef}
+              source={require('../../assets/lottie/loading.json')}
+              autoPlay
+              style={{height: 100}}
+            />
+          </View>
+        </View>
+      </Modal> */}
+    </>
+  );
 };
 
 export default SettingHome;

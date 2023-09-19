@@ -25,6 +25,7 @@ import Lottie from 'lottie-react-native';
 import Input from '../../components/Input';
 import Btn from '../../components/Btn';
 import {useLocalDataBase} from '../../Contexts/LocalDataBase';
+import { colors } from '../../assets/colors';
 
 const FriendsList = ({navigation}) => {
 
@@ -78,7 +79,7 @@ const FriendsList = ({navigation}) => {
   const [showSerch, setshowSerch] = useState(false);
   const animatSearch = event => {
     if (event) {
-      console.log(' showSerch true');
+      // console.log(' showSerch true');
       setshowSerch(true);
       Animated.timing(animatSearchBAr, {
         toValue: 0,
@@ -101,6 +102,7 @@ const FriendsList = ({navigation}) => {
   const [contacts, setcontacts] = useState([]);
   const [myFriends, setmyFriends] = useState([]);
   const [contactsSendMe, setcontactsSendMe] = useState([]);
+  const [contactsSendMeFilter, setcontactsSendMeFilter] = useState([]);
 
   const getContact = async () => {
     setloadingContacts(true);
@@ -127,7 +129,7 @@ const FriendsList = ({navigation}) => {
                 // console.log(data.data.res,"dddddddddddddddddd");
                 saveContactsLive(users).then((res)=>{
                   setloadingContacts(false);
-                  console.log("save contacts succ");
+                  // console.log("save contacts succ");
                 }).catch((err)=>{
                   setloadingContacts(false);
                   console.log(err,"\n from saveContactsLive ");
@@ -141,7 +143,7 @@ const FriendsList = ({navigation}) => {
               })
               .catch((err)=>{
                 setloadingContacts(false);
-                console.error(err)
+                console.log(err)
               })
 
             }
@@ -150,7 +152,7 @@ const FriendsList = ({navigation}) => {
           .catch(e => {
             console.log(e);
             setloadingContacts(false);
-            Alert.alert('خطأ', ' تأكد من إتصالك بالشبكة ');
+            // Alert.alert('خطأ', ' تأكد من إتصالك بالشبكة ');
           });
       
     }
@@ -167,23 +169,22 @@ const FriendsList = ({navigation}) => {
   const [search, setSearch] = useState('');
 
   const SearchBar = name => {
-
-    let filtered = myFriends.filter(item => {
-      const arr = name.split(' ');
-      return arr.some(el =>
-        item.username.toLowerCase().includes(el.toLowerCase()),
-      );
-    });
-    setmyFriends(filtered);
-
-    if (name.length == 0) {
-      setmyFriends(contactsSendMe);
+    const arr = [...contactsSendMe];
+    if (name != "") {
+      setcontactsSendMeFilter((o)=>{
+        return arr.filter((ele)=> ele.username.toLowerCase().includes(name.toLowerCase()) || String(ele.phoneNumber).toLowerCase().includes(name.toLowerCase()) )
+      })
+      return
     }
+    if (name == "") {
+      setcontactsSendMeFilter([])
+    }
+   
   };
   return (
     <View style={{flex: 1, backgroundColor: '#fff'}}>
       <LinearGradient
-        colors={['#5B70F7', '#7F8CE9']}
+        colors={[colors.primary, colors.primary]}
         start={{x: 0, y: 2}}
         end={{x: 0, y: 0}}
         style={{
@@ -255,14 +256,14 @@ const FriendsList = ({navigation}) => {
               // transform:[{rotate:"100deg"}]
             }}
           />
-          <Icon
+          {/* <Icon
             size={20}
             name="dots-vertical"
             type="material-community"
             color={'#fff'}
             onPress={() => {}}
             style={{padding: 8}}
-          />
+          /> */}
         </View>
       </LinearGradient>
 
@@ -298,7 +299,7 @@ const FriendsList = ({navigation}) => {
       </Text>
       <FlatList
         // data={[...myFriends]}
-        data={[...contactsSendMe]}
+        data={contactsSendMeFilter.length > 0 ? [...contactsSendMeFilter]:[...contactsSendMe]}
         onRefresh={() => getContact()}
         refreshing={loadingContacts}
         ListEmptyComponent={

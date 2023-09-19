@@ -13,25 +13,44 @@ import { AppState } from 'react-native';
 
 
 
-export const displayNotfee = async (data) => { 
-
+export const displayNotfee = async (data,navName) => { 
+  await notifee.requestPermission()
+  // console.log(data && data?.chat && AppState.currentState == "background","nofffffffffffffff");
+    if (data && data?.chat && AppState.currentState == "background") {
+      
     const sender = JSON.parse(data.sender)
 
     const nitfe = await notifee.getDisplayedNotifications()
-    console.log(nitfe,"&".repeat(100));
+    const displayNotifee = nitfe.find((ele)=>{
+        notifee.cancelDisplayedNotification(ele.notification.id)
+       if (ele.notification.android.channelId == data?.chat) {
+         return ele;
+       }
+    })
 
-    await notifee.requestPermission()
+    // for get last meesage displaying merage it with new message and display
+    const messages = displayNotifee?.notification?.android?.style?.messages || []
+    messages.push({
+      text: data?.content || "no meesages" ,
+      timestamp: Date.now() - data?.timestamp, 
+    },)
+    // console.log(messages,"messages".repeat(50));
+   
 
-    await notifee.createChannelGroup({
+
+
+   const groupId =  await notifee.createChannelGroup({
         id: data.chat + "group" || "groupID",
         name: 'group',
       });
 
-   await notifee.createChannel({
+  const id =  await notifee.createChannel({
         id:data.chat || "channelID",
         name:sender.username || "channelName",
-        groupId:data.chat + "group" || "groupID",
-        // importance: AppState.currentState == "background" && AndroidImportance.HIGH
+        groupId:groupId,
+        lights:true,
+        vibration:true,
+        importance:  AndroidImportance.HIGH
     })
    await notifee.displayNotification({
         // title: `<p style="color: #333;"><b>${sender?.username}</span></p></b></p>`,
@@ -47,11 +66,11 @@ export const displayNotfee = async (data) => {
           }
         },
         android: {
-          channelId:data.chat || "channelID",
+          channelId:id,
           color: colors.primary,
           groupSummary:true,
           groupId:data.chat + "group",
-          
+          importance:AndroidImportance.HIGH,
           actions: [
             {
               title: 'رد',
@@ -75,19 +94,14 @@ export const displayNotfee = async (data) => {
             person: {
               name: sender?.username || "username",
               icon: sender?.image || "https://www.google.com/search?q=userb+png&sca_esv=563438282&sxsrf=AB5stBgHETdYDsp9ucWQIwqux-tyD2rEpg%3A1694116575452&ei=3yr6ZJnsGZytkdUPs5yCqAU&ved=0ahUKEwjZ176FpJmBAxWcVqQEHTOOAFUQ4dUDCBA&uact=5&oq=userb+png&gs_lp=Egxnd3Mtd2l6LXNlcnAiCXVzZXJiIHBuZzIHEAAYDRiABDIHEAAYDRiABDIGEAAYHhgNMgYQABgeGA0yBhAAGB4YDTIGEAAYHhgNMgYQABgeGA0yBhAAGB4YDTIGEAAYHhgNMgYQABgeGA1IsBBQ-gNY3w5wAXgBkAEBmAGAA6ABjhKqAQUyLTUuM7gBA8gBAPgBAagCCsICBxAjGOoCGCfCAgUQABiABMICCxAuGIAEGMcBGNEDwgIHEAAYigUYQ8ICBRAuGIAEwgIIEAAYywEYgATCAgoQABjLARiABBgKwgIGEAAYHhgKwgILEAAYBRgeGPEEGArCAggQABgFGB4YCsICBBAAGB7CAgsQABgeGA8Y8QQYCsICBRAhGKAB4gMEGAAgQYgGAQ&sclient=gws-wiz-serp&bshm=rimc/1#vhid=KnR9uI1e8d4qTM&vssid=l",
-
+              important:true,
             },
             group:true,
-
-            messages: [
-              {
-                text: data?.content || "no meesages" ,
-                timestamp: Date.now() - data?.timestamp, 
-              },
-              
-            ],
-
+            messages:messages.filter((ele=>ele)),
             },
         },
       });
+
+
+    }
  }

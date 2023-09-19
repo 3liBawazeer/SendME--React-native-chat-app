@@ -3,6 +3,7 @@ import React , {useEffect,useState,useContext,createContext} from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 import {useNavigation} from "@react-navigation/native"
 import { logoutReq } from '../Requists';
+import { socketIo } from './Socket_context';
 
 
 const authContext = createContext({})
@@ -31,16 +32,19 @@ const Auth_Context = ({children}) => {
         return false
      }
 
-     const logout = async () => { 
+     const logout = async (nav) => { 
          await logoutReq(Token,userData?.phoneNumber).then(async()=>{
+            socketIo.disconnect()
             await AsyncStorage.removeItem("user");
             await AsyncStorage.removeItem("token");
+            nav();
          })
       }
 
     const saveloggedIn = async (data) => { 
      if (data.res.user && data.res.token) {
         setUserData(data.res.user)
+        setToken(data.res.token)
         await AsyncStorage.setItem("token",data.res.token).then(()=>{
 
              AsyncStorage.setItem("user",JSON.stringify(data.res.user)).then(()=>{

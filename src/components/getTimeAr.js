@@ -56,16 +56,18 @@ const GetDateLastMessages = ({date, item, index, messages}) => {
   let d = todayDate.getDate();
   // console.log(messages," <?echo this is message come to your tiime function;ty ?>");
   
-  const today = messages.find(item => {
-    let dat = new Date(JSON.parse(item.timestamp));
+  // first message today
+  const today = messages.find(ite => {
+    let dat = new Date(+(JSON.parse(ite.timestamp)));
     let Mm = dat.getMonth() + 1;
     let Yy = dat.getFullYear();
     let Dd = dat.getDate();
     return y == Yy && m == Mm && d == Dd;
   });
   
-  const yester = messages.find(item => {
-    let dat = new Date(JSON.parse(item.timestamp));
+  // first message yesterday
+  const yester = messages.find(ite => {
+    let dat = new Date(+(JSON.parse(ite.timestamp)));
     let Mm = dat.getMonth() + 1;
     let Yy = dat.getFullYear();
     let Dd = dat.getDate();
@@ -75,21 +77,21 @@ const GetDateLastMessages = ({date, item, index, messages}) => {
   let arr = [];
 
 
-  const LongTimeAgo = messages?.filter(item => {
-    // let dat = new Date(JSON.parse(item.timestamp));
+  const LongTimeAgo = messages?.filter(itm => {
+    // let dat = new Date(+(item.timestamp));
     // let Mm = dat.getMonth() + 1;
     // let Yy = dat.getFullYear();
     // let Dd = dat.getDate();
     const find = arr.find(ite => {
       const d =
-      getDate(JSON.parse(ite.timestamp)).D ==
-      getDate(JSON.parse(item.timestamp)).D;
+      getDate(+(JSON.parse(ite.timestamp))).D ==
+      getDate(+(JSON.parse(itm.timestamp))).D;
       const m =
-      getDate(JSON.parse(ite.timestamp)).M ==
-      getDate(JSON.parse(item.timestamp)).M;
+      getDate(+(JSON.parse(ite.timestamp))).M ==
+      getDate(+(JSON.parse(itm.timestamp))).M;
       const y =
-      getDate(JSON.parse(ite.timestamp)).Y ==
-      getDate(JSON.parse(item.timestamp)).Y;
+      getDate(+(JSON.parse(ite.timestamp))).Y ==
+      getDate(+(JSON.parse(itm.timestamp))).Y;
       return d && m && y;
     });
     if (!find || arr.length == 0) {
@@ -104,7 +106,7 @@ const GetDateLastMessages = ({date, item, index, messages}) => {
       <View
         style={{alignItems: 'center', justifyContent: 'center', margin: 10,}}>
         <View style={{padding: 7, borderRadius: 50,paddingHorizontal:20,}}>
-          <Text style={{color: colors.secondry,fontWeight:"bold",borderWidth:1,borderColor:colors.secondry,paddingHorizontal:20,borderRadius:10}}> اليوم </Text>
+          <Text style={{color: colors.primary,fontWeight:"bold",borderWidth:0,borderColor:colors.secondry,paddingHorizontal:20,borderRadius:10,backgroundColor:"#fff"}}> اليوم </Text>
         </View>
       </View>
     );
@@ -113,7 +115,7 @@ const GetDateLastMessages = ({date, item, index, messages}) => {
       <View
         style={{alignItems: 'center', justifyContent: 'center', margin: 10,}}>
         <View style={{padding: 7, borderRadius: 50,paddingHorizontal:20,}}>
-          <Text style={{color: colors.secondry,fontWeight:"bold",borderBottomWidth:1}}> أمس </Text>
+          <Text style={{color: colors.primary,fontWeight:"bold",borderWidth:0,borderColor:colors.secondry,paddingHorizontal:20,borderRadius:10,backgroundColor:"#fff"}}> أمس </Text>
         </View>
       </View>
     );
@@ -122,8 +124,8 @@ const GetDateLastMessages = ({date, item, index, messages}) => {
       <View
         style={{alignItems: 'center', justifyContent: 'center', margin: 10,}}>
         <View style={{padding: 7, borderRadius: 50,paddingHorizontal:20,}}>
-          <Text style={{color: colors.secondry,fontWeight:"bold",borderBottomWidth:1}}>
-            {enToAr(getDate(JSON.parse(item.timestamp)).date)}
+          <Text style={{color: colors.primary,fontWeight:"bold",borderWidth:0,borderColor:colors.secondry,paddingHorizontal:20,borderRadius:10,backgroundColor:"#fff"}}>
+            {enToAr(getDate(+(JSON.parse(item.timestamp))).date)}
           </Text>
         </View>
       </View>

@@ -6,4 +6,5 @@ export const colors = {
     typograf:"#004",
     green:"#00db7d",
     light:"#eff3fc",
+    white:"#ffffff"
 }

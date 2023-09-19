@@ -72,7 +72,7 @@ const EditProfile = ({navigation}) => {
             };
             saveloggedIn(allData);
             setImageSelected('');
-            ToastAndroid.show("تم تعديل الصورة")
+            // ToastAndroid.show("تم تعديل الصورة")
           })
           .catch(err => {
             seteditImageLoading(false);
@@ -81,6 +81,8 @@ const EditProfile = ({navigation}) => {
           seteditImageLoading(false);
       }else{
         console.log(" لم يتم حفظ الصوره");
+        seteditImageLoading(false);
+
       }
       
     } catch (err) {
@@ -103,10 +105,10 @@ const EditProfile = ({navigation}) => {
     })
   };
 
-  console.log(userData?.image);
+  // console.log(userData?.image);
 
   const editName = () => {
-    console.log(username);
+    // console.log(username);
     setloadEditName(true);
     editProfile(
       {phoneNumber: userData.phoneNumber, username, image: userData.image},
@@ -255,7 +257,7 @@ const EditProfile = ({navigation}) => {
                 <Image
                   style={{width: '100%', height: '100%',backgroundColor:"#eef"}}
                   // source={ImageSelected !== '' && {uri: ImageSelected} }
-                  source={ ! userData?.image || userData?.image == 'image-user.png' ||  userData?.image == ""
+                  source={ userData?.image == 'image-user.png' ||  userData?.image == ""
                   ? require('../../assets/images/user-image.png')
                   : {uri: userData?.image}}
                 />
@@ -347,7 +349,7 @@ const EditProfile = ({navigation}) => {
             setshowEditName(false);
           }}>
           <LinearGradient
-            colors={['#5B70F7', '#7F8CE9']}
+            colors={[colors.primary, colors.primary]}
             start={{x: 0, y: 0.5}}
             end={{x: 1, y: 0}}
             style={styles.hd}>
@@ -379,7 +381,7 @@ const EditProfile = ({navigation}) => {
           <View style={{alignItems: 'center', margin: 20, marginBottom: 0}}>
             <Input
               ic2
-              icc2={'#5274E9'}
+              icc2={colors.secondry}
               icn2="person"
               ict2="fontisto"
               placeholder="أدخل إسمك"

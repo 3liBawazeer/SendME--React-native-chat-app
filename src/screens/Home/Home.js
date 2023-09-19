@@ -1,4 +1,4 @@
-import {Alert, FlatList, Image, TouchableOpacity, Pressable,StyleSheet, View ,Dimensions,Animated} from 'react-native';
+import {Alert, FlatList, Image, TouchableOpacity, Pressable,StyleSheet, View ,Dimensions,Animated, ActivityIndicator} from 'react-native';
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import Header from '../../components/Header';
 import {Tab, Text, Icon, Button} from '@rneui/themed';
@@ -14,28 +14,72 @@ import {Avatar} from '@rneui/base';
 import RBSheet from "react-native-raw-bottom-sheet";
 import {StatusBar} from 'react-native';
 import { colors } from '../../assets/colors';
-
+import notifee, { AndroidImportance, AndroidStyle } from '@notifee/react-native';
+import Lottie from 'lottie-react-native';
+import { getUnReadMessages } from '../../Requists';
 const {height, width} = Dimensions.get('window');
 
 const Home = ({navigation}) => {
   const {
     LastChats,
+    setLastChats,
     setAllMessages,
     AllMessages,
     MessagesNotRead,
     getMessagesNotRead,
-    contactsLive
   } = useLocalDataBase();
-  const {OnlineUsers} = useSocket();
+  const {OnlineUsers,reciveMessagesfun,netConnection} = useSocket();
 
-  const {userData, logout} = useAuth();
+  const {userData, Token} = useAuth();
   const refRBSheet = useRef();
+  const [checkMessages,setcheckMessages] = useState(false)
 
   useFocusEffect(
     useCallback(() => {
-      console.log(MessagesNotRead);
-    }, []),
-  );
+      notifee.cancelDisplayedNotifications()
+    }, []));
+
+    useEffect(() => {
+         setcheckMessages(()=>true)
+      if (!netConnection.isConnected) {
+        setcheckMessages(false)
+      }else{
+       
+        getUnReadMessages({token:Token,id:userData?._id})
+        .then((data)=>{
+          const mesg = data.data.res || []
+          if (mesg?.length != 0) {
+            let chats = [...LastChats];
+            mesg?.forEach( (ele) => {
+              const findChat = chats.find(item => item.chat == ele.chat);
+              if (findChat) {
+                 reciveMessagesfun(ele,false);
+              }else{
+                chats.push({
+                  friendData: JSON.parse(ele.sender),
+                  chat: ele.chat,
+                });
+                 reciveMessagesfun(ele,true);
+              }
+              
+              return ele
+            });
+          }
+          setcheckMessages(false)
+        }).catch((err)=>{
+          setcheckMessages(false)
+          console.log(err,"on get un read messages ");
+        })
+
+      }
+      
+      return () =>{
+        setcheckMessages(false)
+      }
+  }, [netConnection])
+
+
+  let animationRef = useRef(null);
   const STATUSBAR_HEIGHT = StatusBar.currentHeight;
 
   const [shadowBackGround, setshadowBackGround] = useState(new Animated.Value(0))
@@ -50,8 +94,13 @@ const Home = ({navigation}) => {
     // {name:'person',type:'fontisto',title:"الملف الشخصي"},
   ];
 
-
-
+  useEffect(() => {
+    animationRef.current?.play(0, 240);
+    return () => {
+      animationRef.current?.stop();
+    };
+  }, []);
+ 
   return (
     <>
 
@@ -86,28 +135,31 @@ const Home = ({navigation}) => {
                 style={{backgroundColor: '#fff2', padding: 7}}
               />
 
+              
+
+              <View style={{flexDirection: 'row',alignItems:"center"}}>
+                
               <View
                 style={{
                   marginTop: 10,
                   marginHorizontal: 10,
                   flexDirection: 'row-reverse',
                   alignItems: 'center',
+                  transform:[{scale:0.98}]
                 }}>
                 <Image
                   source={require('../../assets/images/sendMe_fff.png')}
-                  style={{width: 30, height: 45}}
+                  style={{width: 34, height: 45}}
                 />
                 <Text style={{fontSize: 25, fontWeight: '700', color: colors.light }}>
                   END
                   <Text
-                    style={{fontSize: 25, fontWeight: '900', color: colors.secondry}}>
+                    style={{fontSize: 25, fontWeight: '900', color: colors.secondry,}}>
                     ME
                   </Text>
                 </Text>
               </View>
-
-              <View style={{flexDirection: 'row'}}>
-                {/* <Icon onPress={()=>{navigation.navigate('friendsList')}} name='search' type="feather" containerStyle={{borderRadius:15,marginTop:10,marginHorizontal:5}} color="#fff" style={{backgroundColor:"#fff2",padding:7,}} /> */}
+                
                 <Icon
                   onPress={() => {
                     refRBSheet.current.open();
@@ -158,6 +210,7 @@ const Home = ({navigation}) => {
                 />
              </View> */}
 
+
             <View
               style={{
                 flex: 1,
@@ -166,6 +219,11 @@ const Home = ({navigation}) => {
                 borderTopLeftRadius: 20,
                 marginTop: 10,
               }}>
+                {checkMessages && <View style={{height:40,backgroundColor:colors.light,flexDirection:"row",justifyContent:"space-between",alignItems:"center",paddingHorizontal:20}} >
+                  {/* <ActivityIndicator color={colors.secondry} size={30} /> */}
+                  
+                  <Text> جاري التحقق من وجود رسائل جديده ...</Text>
+                </View>}
               <HomeView
                 OnlineUsers={OnlineUsers}
                 getMessagesNotRead={getMessagesNotRead}
@@ -181,8 +239,12 @@ const Home = ({navigation}) => {
         </View>
       </View>
 
-    {backBlack && <Animated.View style={{backgroundColor:`#000`,position:"absolute",height,width,zIndex:10,opacity:shadowBackGround}} ></Animated.View> }
+      {backBlack && <Animated.View style={{backgroundColor:`#000`,position:"absolute",height,width,zIndex:10,opacity:shadowBackGround}} ></Animated.View> }
+      
+      
+      {/* <AlertDialog/> */}
 
+     
 
        <RBSheet
         ref={refRBSheet}
@@ -279,4 +341,11 @@ const styles = StyleSheet.create({
   body: {
     flex: 1,
   },
+  absolute: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0
+  }
 });
