@@ -17,12 +17,13 @@ import { colors } from '../../assets/colors';
 import notifee, { AndroidImportance, AndroidStyle } from '@notifee/react-native';
 import Lottie from 'lottie-react-native';
 import { getUnReadMessages } from '../../Requists';
+import { useMessagesStatusChangedOfflineChecker } from "../../hooks/useMessagesStatusChangedOfflineChecker"
+import { useMessagesRemovedOfflineChecker } from '../../hooks/useMessagesRemovedOfflineChecker';
 const {height, width} = Dimensions.get('window');
 
 const Home = ({navigation}) => {
   const {
     LastChats,
-    setLastChats,
     setAllMessages,
     AllMessages,
     MessagesNotRead,
@@ -38,6 +39,11 @@ const Home = ({navigation}) => {
     useCallback(() => {
       notifee.cancelDisplayedNotifications()
     }, []));
+
+    // hooks 
+    useMessagesRemovedOfflineChecker()
+    useMessagesStatusChangedOfflineChecker()
+
 
     useEffect(() => {
          setcheckMessages(()=>true)
@@ -115,7 +121,7 @@ const Home = ({navigation}) => {
 
             <View
               style={{
-                flexDirection: 'row',
+                flexDirection: 'row-reverse',
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 marginHorizontal: 5,
@@ -137,26 +143,26 @@ const Home = ({navigation}) => {
 
               
 
-              <View style={{flexDirection: 'row',alignItems:"center"}}>
+              <View style={{flexDirection: 'row-reverse',alignItems:"center"}}>
                 
               <View
                 style={{
                   marginTop: 10,
                   marginHorizontal: 10,
-                  flexDirection: 'row-reverse',
+                  flexDirection: 'row',
                   alignItems: 'center',
                   transform:[{scale:0.98}]
                 }}>
-                <Image
+                {/* <Image
                   source={require('../../assets/images/sendMe_fff.png')}
                   style={{width: 34, height: 45}}
-                />
-                <Text style={{fontSize: 25, fontWeight: '700', color: colors.light }}>
-                  END
-                  <Text
+                /> */}
+                <Text style={{fontSize: 18, fontWeight: '900', color: colors.light }}>
+                 مراسلــه
+                  {/* <Text
                     style={{fontSize: 25, fontWeight: '900', color: colors.secondry,}}>
                     ME
-                  </Text>
+                  </Text> */}
                 </Text>
               </View>
                 
@@ -215,8 +221,8 @@ const Home = ({navigation}) => {
               style={{
                 flex: 1,
                 backgroundColor: '#fff',
-                borderTopRightRadius: 20,
-                borderTopLeftRadius: 20,
+                borderTopRightRadius: 0,
+                borderTopLeftRadius: 0,
                 marginTop: 10,
               }}>
                 {checkMessages && <View style={{height:40,backgroundColor:colors.light,flexDirection:"row",justifyContent:"space-between",alignItems:"center",paddingHorizontal:20}} >
@@ -224,6 +230,9 @@ const Home = ({navigation}) => {
                   
                   <Text> جاري التحقق من وجود رسائل جديده ...</Text>
                 </View>}
+                <View style={{height:40,backgroundColor:colors.white,flexDirection:"row",justifyContent:"space-between",alignItems:"center",paddingHorizontal:20,paddingTop:10}} >
+                  <Text style={{fontSize:15,color:colors.typograf,paddingHorizontal:5}} >آخر دردشات</Text>
+                </View>
               <HomeView
                 OnlineUsers={OnlineUsers}
                 getMessagesNotRead={getMessagesNotRead}

@@ -24,6 +24,7 @@ import Lottie from 'lottie-react-native';
 import { Input } from '@rneui/themed';
 import messageing from "@react-native-firebase/messaging"
 import { colors } from '../../assets/colors';
+import { useLocalDataBase } from '../../Contexts/LocalDataBase';
 // cokors 7207c4 ==>
 
 const customStyles = {
@@ -53,9 +54,13 @@ const customStyles = {
 const PhoneVerifcation = ({navigation}) => {
   const scrollViewRef = useRef();
   let animationRef = useRef(null);
+  const {setAllMessages,setLastChats,setMessagesNotRead} = useLocalDataBase();
 
   useEffect(() => {
     animationRef.current?.play(0, 240);
+    setAllMessages([]);
+    setLastChats([]);
+    setMessagesNotRead([]);
   }, []);
 
   
@@ -96,8 +101,8 @@ const PhoneVerifcation = ({navigation}) => {
           setloading(false);
         }
       }else{
-        const fcmToken = await messageing().getToken();
-        signUp({phoneNumber,countryKey,FCMtoken:fcmToken})
+        // const fcmToken = await messageing().getToken();
+        signUp({phoneNumber,countryKey,FCMtoken:""})
           .then(data => {
             if (data.data.res.new == 'true') {
               setverLoading(false);
@@ -117,6 +122,24 @@ const PhoneVerifcation = ({navigation}) => {
               setverLoading(false);
               Alert.alert('خطأ', ' تأكد من إتصالك بالشبكة ');
             }
+          }).catch((error)=>{
+            
+                const err = error.message.split(' ')[0];
+                switch (err) {
+                  case '[auth/invalid-phone-number]':
+                    Alert.alert(
+                      '!خطأ',
+                      'حدث خطأ اثنأ تسجيل الدخول الرجاء التأكد من الرقم ',
+                    );
+                    break;
+                  case '[auth/network-request-failed]':
+                    Alert.alert('خطأ', 'تأكد من إتصالك بالشبكة ');
+                    break;
+                  default:
+                    console.log(error.message);
+                    break;
+                }
+                setloading(false);
           })
           .finally(()=>{
             setverLoading(false);
@@ -128,6 +151,7 @@ const PhoneVerifcation = ({navigation}) => {
 
       }
     } catch (error) {
+      console.log(error);
       const err = error.message.split(' ')[0];
       switch (err) {
         case '[auth/invalid-phone-number]':

@@ -1,9 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import {StyleSheet,Image, View,Text} from 'react-native';
-import {Icon, Button, Header} from '@rneui/themed';
 import LinearGradient from 'react-native-linear-gradient';
 import {useAuth} from '../Contexts/Auth_Context';
-import {socketIo, useSocket} from '../Contexts/Socket_context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useLocalDataBase} from '../Contexts/LocalDataBase';
 import { colors } from '../assets/colors';

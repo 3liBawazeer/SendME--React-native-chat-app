@@ -24,9 +24,15 @@ const AlertDialog = ({
         rejectBtnTitle:"نعم",
         acceptBtnPress:()=>{},
         rejectBtnPress:()=>{},
-    }
+    },
+    cancelBtn = false,
+    showBtnAccept=true,
+    showBtnReject=true,
+    setState
 }) => {
     
+
+
   return (
     <Modal
      transparent
@@ -34,6 +40,7 @@ const AlertDialog = ({
      visible={data.visible}
      onRequestClose={()=>{
         data.visible = false
+        setState(false)
      }}
     >
         <View style={styles.alertContainer} >
@@ -48,12 +55,12 @@ const AlertDialog = ({
                     </Text>
                 </View>
                 <View style={{flexDirection:"row",padding:5,}} >
-                    <TouchableOpacity style={{padding:10,marginHorizontal:10}} onPress={btns.acceptBtnPress}>
+                    {showBtnAccept&&<TouchableOpacity style={{padding:10,marginHorizontal:10}} onPress={btns.acceptBtnPress}>
                         <Text style={{color:colors.secondry,fontSize:15,fontWeight:"bold"}} > {btns.acceptBtnTitle} </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={{padding:10,marginHorizontal:10}} onPress={btns.rejectBtnPress} >
+                    </TouchableOpacity>}
+                   {showBtnReject&&<TouchableOpacity style={{padding:10,marginHorizontal:10}} onPress={btns.rejectBtnPress} >
                         <Text style={{color:colors.secondry,fontSize:15,fontWeight:"bold"}} > {btns.rejectBtnTitle} </Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity>}
                 </View>
             </View>
         </View>

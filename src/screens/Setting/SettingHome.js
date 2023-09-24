@@ -22,20 +22,17 @@ const SettingHome = ({navigation}) => {
 
   const STATUSBAR_HEIGHT = StatusBar.currentHeight;
   const {saveloggedIn, userData, Token, logout} = useAuth();
-  const {RemoveAllData} = useLocalDataBase();
+  const {RemoveAllData,setAllMessages,setLastChats,setMessagesNotRead} = useLocalDataBase();
   const [loadDeleteAcount, setloadDeleteAcount] = useState(false);
   const [logoutLoading, setlogoutLoading] = useState(false);
   const [showAlertDialog, setshowAlertDialog] = useState(false)
 const [showAlertDeleteAccount, setshowAlertDeleteAccount] = useState(false)
-  const logOut = async (del=false) => {
-    await logout(() => {}).then(() => {
-      RemoveAllData().then(() => {
-        setlogoutLoading(false);
-        if (!del) {
-          (navigation.replace('phone'));
-        }
-       
-      });
+  const logOut = async () => {
+    await RemoveAllData()
+    await logout().then( async () => {
+      setlogoutLoading(false);
+     
+      (navigation.replace('phone'));
     });
   };
 

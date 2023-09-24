@@ -23,10 +23,14 @@ const HomeView = ({
   OnlineUsers,
 }) => {
   const getLastMessage = chatId => {
-    const filterMesg = AllMessages?.filter(it => chatId == it.chat);
-    const index = filterMesg?.length - 1;
-    const lastMesg = filterMesg[index];
-    return lastMesg || "8828";
+    if (chatId) {
+      const filterMesg = AllMessages?.filter(it => chatId == it.chat);
+      const index = filterMesg?.length - 1;
+      const lastMesg = filterMesg[index];
+      return lastMesg || "8828";
+    }else{
+      return null
+    }
   };
   // let noread;
   // const notRead = (item) => {
@@ -53,7 +57,7 @@ const HomeView = ({
         }
         
         renderItem={({item,index}) => {
-          const senderlastMessage = JSON.parse(getLastMessage(item?.chat)?.sender)
+          const senderlastMessage = getLastMessage(item?.chat) ? JSON.parse(getLastMessage(item?.chat)?.sender) : null
        return (<>
           
           <TouchableOpacity
@@ -92,10 +96,10 @@ const HomeView = ({
                 </View>
               </LinearGradient>
 
-              <View style={{marginHorizontal: 7,alignItems:"flex-start",justifyContent:"center"}}>
+              <View style={{marginHorizontal: 7,alignItems:"flex-start",justifyContent:"center",}}>
                 <Text style={styles.name}>{item?.friendData?.username}</Text>
                 <Text style={styles.last} numberOfLines={1}>
-                  { (senderlastMessage && !!(userData?._id) )&& ( (senderlastMessage?.id) == userData?._id) ? `انت : ${getLastMessage(item?.chat)?.content}` : getLastMessage(item?.chat)?.content}
+                  { (senderlastMessage && !!(userData?._id) ) && ( (senderlastMessage?.id) == userData?._id) ? `انت : ${getLastMessage(item?.chat)?.content}` : getLastMessage(item?.chat)?.content}
                 </Text>
               </View>
 
@@ -134,6 +138,7 @@ const HomeView = ({
             </Text>
             </View>
           </TouchableOpacity>
+          <View style={{borderBottomColor: colors.light,borderBottomWidth: 1,width:"82%",alignItems:"center",alignSelf:"flex-end"}} />
         </>)}}
       />
     </View>
@@ -157,12 +162,10 @@ const styles = StyleSheet.create({
   listbody: {
     flexDirection: 'row',
     margin: 5,
-    borderBottomColor: '#ddd',
-    borderBottomWidth: 1,
     padding: 5,
     marginBottom: 0,
-    justifyContent:"space-between"
-    // backgroundColor:"#08d"
+    justifyContent:"space-between",
+   paddingBottom:5
   },
   buttonText: {
     textAlign: 'center',

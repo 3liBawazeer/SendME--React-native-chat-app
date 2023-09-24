@@ -106,7 +106,7 @@ const GetDateLastMessages = ({date, item, index, messages}) => {
       <View
         style={{alignItems: 'center', justifyContent: 'center', margin: 10,}}>
         <View style={{padding: 7, borderRadius: 50,paddingHorizontal:20,}}>
-          <Text style={{color: colors.primary,fontWeight:"bold",borderWidth:0,borderColor:colors.secondry,paddingHorizontal:20,borderRadius:10,backgroundColor:"#fff"}}> اليوم </Text>
+          <Text style={{color: colors.primary,fontWeight:"bold",borderWidth:0,borderColor:colors.secondry,paddingHorizontal:20,borderRadius:10,backgroundColor:colors.light}}> اليوم </Text>
         </View>
       </View>
     );
@@ -115,7 +115,7 @@ const GetDateLastMessages = ({date, item, index, messages}) => {
       <View
         style={{alignItems: 'center', justifyContent: 'center', margin: 10,}}>
         <View style={{padding: 7, borderRadius: 50,paddingHorizontal:20,}}>
-          <Text style={{color: colors.primary,fontWeight:"bold",borderWidth:0,borderColor:colors.secondry,paddingHorizontal:20,borderRadius:10,backgroundColor:"#fff"}}> أمس </Text>
+          <Text style={{color: colors.primary,fontWeight:"bold",borderWidth:0,borderColor:colors.secondry,paddingHorizontal:20,borderRadius:10,backgroundColor:colors.light}}> أمس </Text>
         </View>
       </View>
     );
@@ -124,7 +124,7 @@ const GetDateLastMessages = ({date, item, index, messages}) => {
       <View
         style={{alignItems: 'center', justifyContent: 'center', margin: 10,}}>
         <View style={{padding: 7, borderRadius: 50,paddingHorizontal:20,}}>
-          <Text style={{color: colors.primary,fontWeight:"bold",borderWidth:0,borderColor:colors.secondry,paddingHorizontal:20,borderRadius:10,backgroundColor:"#fff"}}>
+          <Text style={{color: colors.primary,fontWeight:"bold",borderWidth:0,borderColor:colors.secondry,paddingHorizontal:20,borderRadius:10,backgroundColor:colors.light}}>
             {enToAr(getDate(+(JSON.parse(item.timestamp))).date)}
           </Text>
         </View>

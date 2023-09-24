@@ -34,7 +34,7 @@ const LocalDataBase = ({children}) => {
   const [contactsNotReg, setcontactsNotReg] = useState([]);
 
   const [checkChatsAndMessages, setcheckChatsAndMessages] = useState(0);
-  const [loadCreatTables, setloadCreatTables] = useState(false)
+  const [loadCreatTables, setloadCreatTables] = useState(false);
 
   // select count(*) from employee | for check
 
@@ -71,12 +71,12 @@ const LocalDataBase = ({children}) => {
       });
 
       // ContactsLive
-
+      // {"FCMtoken": "fcmToken", "__v": 15, "_id": "64ff3074a1f75ac2fc8abe3c", "countryKey": "+967", "friends": [], "groups": [], "image": "https://firebasestorage.googleapis.com/v0/b/sendme-98b81.appspot.com/o/usersImgaes%2F713263323-profile.png?alt=media&token=a8916b3e-b618-4f8e-a840-fa925c125538", "messagesStatus": [], "phoneNumber": 713263323, "unReadMessages": [], "username": "Ali Bawazir"}
       await db.transaction(tx => {
         tx.executeSql(
           'CREATE TABLE IF NOT EXISTS ' +
             TablesName.contactsLive +
-            ' (ID INTEGER PRIMARY KEY AUTOINCREMENT, body TEXT)',
+            '(ID INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, countryKey TEXT, phoneNumber TEXT, userId TEXT, image TEXT)',
           [],
           () => {
             // console.log('CREATE CONTACTS LIVE TABLE SUCCESSFULY :) ...');
@@ -99,36 +99,32 @@ const LocalDataBase = ({children}) => {
       //     err => console.log('CREATE CONTACTS NOT REG TABLE ERROR :( ', err),
       //   );
       // });
-
-
     } catch (error) {
       console.log(error, ' :: ERROR ON CREATE TABLES :: ');
     }
-    
   };
 
-  const checkTables = (name) => { 
+  const checkTables = name => {
     const promise = new Promise((resolve, reject) => {
-        if (name == TablesName.contactsLive) {
-          db.transaction(tx => {
-            tx.executeSql(
-               `SELECT * FROM ${TablesName.contactsLive}`,
-              [],
-              (tx, res) => {
-                // console.log(res.rows , "this is res from count(*)");
-                if (res.rows.length == 0) {
-                  resolve("add")
-                }else if(res.rows.length > 0){
-                  resolve("update")
-                }
-              },
-              err => reject(err),
-            );
-          });
-        }
-      });
-      return promise ;
-   }
+      if (name == TablesName.contactsLive) {
+        db.transaction(tx => {
+          tx.executeSql(
+            `SELECT * FROM ${TablesName.contactsLive}`,
+            [],
+            (tx, res) => {
+              if (res.rows.length == 0) {
+                resolve('add');
+              } else if (res.rows.length > 0) {
+                resolve('update');
+              }
+            },
+            err => reject(err),
+          );
+        });
+      }
+    });
+    return promise;
+  };
 
   useEffect(() => {
     const clearOut = setTimeout(() => {
@@ -178,10 +174,13 @@ const LocalDataBase = ({children}) => {
             "')",
           [],
           (tx, res) => {
-            resolve('SAVE NEW CHAT SUCCEFULY >>>');
             getLastChats();
+            resolve('SAVE NEW CHAT SUCCEFULY >>>');
           },
-          err =>{ reject(err);console.log("error : on saveLastChat =>  ",err);},
+          err => {
+            reject(err);
+            console.log('error : on saveLastChat =>  ', err);
+          },
         );
       });
     });
@@ -213,31 +212,65 @@ const LocalDataBase = ({children}) => {
     return n;
   };
 
-  const saveContactsLive = async (data) => {
-    const numbers = JSON.stringify(data);
-    // console.log(numbers);
-    // checkTables(TablesName.contactsLive).then((ch)=>{
+  const saveContactsLive = async data => {
+
+      const newContact = [];
+      const lastContact = []
+      data.filter((item)=>{
+        const find = contactsLive.find((ele)=>item?._id == ele.userId)
+        if (find) {
+          lastContact.push(item)
+        } else {
+          newContact.push(item)
+        }
+      });
+
       
+     let SqlQuiryAdd ;
+     let SqlQuiryUpdate ;
+
+      SqlQuiryAdd = `INSERT INTO ${TablesName.contactsLive} (userId,username,countryKey,phoneNumber,image) VALUES (?,?,?,?,?)`
+      newContact.map((ele)=>{
         db.transaction(tx => {
           tx.executeSql(
-            // `UPDATE ${TablesName.contactsLive} SET body = ${data} WHERE ID = 1 ;`,
-            // [],
-            `UPDATE ${TablesName.contactsLive} set body=? where ID=?`,
-            [numbers,1],
+            SqlQuiryAdd,
+            [ele?._id, ele?.username, ele?.countryKey, ele?.phoneNumber, ele?.image],
             (x, result) => {
-              getcontactsLive()
-              // console.log(" update SAVE CONTACTS live SUCCESFLUY c0000n74c7");
+              getcontactsLive();
+              console.log(' save your contact finshed 👍');
             },
             err => {
-              console.log(' ERROR ON Change isRead to true :( ', err.message);
+              console.log(
+                '🧐 error on save your contact : ',
+                err.message,
+              );
             },
           );
         });
-        
-       
-    // }).catch((err)=>{
-    //   console.log("ERROR ON SAVE CONTACTS LIVE",err);
-    // })
+      });
+
+
+      SqlQuiryUpdate = `UPDATE ${TablesName.contactsLive} set username = ?,countryKey = ?,phoneNumber = ?, image = ? where userId = ?`
+      lastContact.map((ele)=>{
+        db.transaction(tx => {
+          tx.executeSql(
+            SqlQuiryUpdate,
+            [ele?.username, ele?.countryKey, ele?.phoneNumber, ele?.image, ele?._id],
+            (x, result) => {
+              getcontactsLive();
+              console.log(' update SAVE CONTACTS live SUCCESFLUY c0000n74c7');
+            },
+            err => {
+              console.log(
+                ' ERROR ON SAVE CONTACTS live SUCCESFLUY c0000n74c7 :( ',
+                err.message,
+              );
+            },
+          );
+        });
+      });
+
+    
   };
 
   // const saveContactsNotReg = data => {
@@ -288,7 +321,10 @@ const LocalDataBase = ({children}) => {
           },
           err => {
             setcheckChatsAndMessages(o => o + 1);
-            console.log(' ERROR ON GET MESSAGES :( on res err sql ', err.message);
+            console.log(
+              ' ERROR ON GET MESSAGES :( on res err sql ',
+              err.message,
+            );
           },
         );
       });
@@ -346,7 +382,6 @@ const LocalDataBase = ({children}) => {
               mesg.push(result.rows.item(i));
             }
             setMessagesNotRead(mesg);
-          
           } else {
             setMessagesNotRead([]);
             // console.log(
@@ -366,25 +401,30 @@ const LocalDataBase = ({children}) => {
     const last = new Promise((resolve, reject) => {
       db.transaction(tx => {
         tx.executeSql(
-          'SELECT * FROM ' + TablesName.contactsLive + ";",
+          'SELECT * FROM ' + TablesName.contactsLive + ';',
           [],
           (x, result) => {
-            let len = result.rows.length
+            let len = result.rows.length;
             // console.log(result.rows.length ," lklklklkl");
+            console.log('ALL ConTact = ', len);
             if (len == 0) {
-                // console.log("GET CONTACTS LIVE SUCCESFLU length == 0");
-                setcheckChatsAndMessages(o => o + 1);
-                setcontactsLive([]);
-                resolve([])
-            }else if (len > 0) {
-                setcheckChatsAndMessages(o => o + 1);
-                setcontactsLive([...JSON.parse(result.rows.item(0).body)]);
-                resolve(arr);
+              // console.log("GET CONTACTS LIVE SUCCESFLU length == 0");
+              setcheckChatsAndMessages(o => o + 1);
+              setcontactsLive([]);
+              resolve([]);
+            } else if (len > 0) {
+              setcheckChatsAndMessages(o => o + 1);
+              let arr = []
+              for (let i = 0; i < result.rows.length; i++) {
+                 arr.push(result.rows.item(i))
+              }
+              setcontactsLive(arr);
+              resolve(arr);
             }
           },
           err => {
             setcheckChatsAndMessages(o => o + 1);
-            console.log(' ERROR ON GET CONTACTS LIVE :( ', err.message);
+            console.log(' ERROR ON GET CONTACTS LIVE 🧐 ', err.message);
             reject(err);
           },
         );
@@ -440,6 +480,7 @@ const LocalDataBase = ({children}) => {
 
   const RemoveAllData = async () => {
     try {
+      
       await db.transaction(tx => {
         tx.executeSql(`DELETE FROM ${TablesName.message}`);
       });
@@ -452,20 +493,37 @@ const LocalDataBase = ({children}) => {
       await db.transaction(tx => {
         tx.executeSql(`DELETE FROM ${TablesName.contactsNoteReg}`);
       });
-      // console.log('DATABASE DELETED SUCCESFUl');
-      setAllMessages([]);
-      setLastChats([]);
-      setMessagesNotRead([]);
+      console.log('DATABASE DELETED SUCCESFUl');
+      
     } catch (error) {
       console.log(error, 'on delete database data');
+      return false
     }
   };
+
+  const deleteMessagesByIds = async (messageIds) => {
+  await  db.transaction((tx) => {
+      const placeholders = messageIds.map(() => '?').join(',');
+      const sql = `DELETE FROM ${TablesName.message} WHERE id IN (${placeholders})`;
+  
+      tx.executeSql(sql, messageIds, (_, resultSet) => {
+        getAllMessages()
+        getMessagesNotRead()
+        console.log('تم حذف الرسائل بنجاح');
+      }, (_, error) => {
+        console.log('حدث خطأ أثناء حذف الرسائل:', error.message);
+      });
+    });
+  };
+
 
   const checkIsRead = chatId => {
     // console.log(chatId);
     db.transaction(tx => {
       tx.executeSql(
-        `UPDATE ${TablesName.message} SET isRead = 1 WHERE chat == ${JSON.stringify(chatId)}`,
+        `UPDATE ${
+          TablesName.message
+        } SET isRead = 1 WHERE chat == ${JSON.stringify(chatId)}`,
         [],
         (x, result) => {
           // console.log('Change isRead to true Succfuly . ):');
@@ -479,47 +537,51 @@ const LocalDataBase = ({children}) => {
   };
 
   const updateMultipleMessages = async (messageIds, newContent) => {
-    const updateQuery = `UPDATE messages SET content = ? WHERE id IN (${messageIds.join(',')})`;
-    
+    const updateQuery = `UPDATE messages SET content = ? WHERE id IN (${messageIds.join(
+      ',',
+    )})`;
+
     try {
-      await db.transaction(async (transaction) => {
+      await db.transaction(async transaction => {
         await transaction.executeSql(updateQuery, [newContent]);
       });
-  
+
       console.log('تم تعديل الرسائل بنجاح');
     } catch (error) {
       console.error('حدث خطأ أثناء تعديل الرسائل:', error);
     }
   };
 
-  const changeMessageStatus = async (messageIds,status) => {
-   if (messageIds.length != 0) {
+  const changeMessageStatus = async (messageIds, status) => {
+    if (messageIds.length != 0) {
       try {
-        await messageIds.map( async (item)=>{
+        await messageIds.map(async item => {
           console.log(JSON.parse(JSON.stringify(item)));
-           const updateQuery = `UPDATE ${TablesName.message} SET isRead = ${status} WHERE id == ${JSON.stringify(item)}`;
+          const updateQuery = `UPDATE ${
+            TablesName.message
+          } SET isRead = ${status} WHERE id == ${JSON.stringify(item)}`;
           await db.transaction(tx => {
-             tx.executeSql(
-               updateQuery,
-               [],
-               (x, result) => {
-                 console.log(`Change isRead to ${status} Succfuly . ):`);
-                 getAllMessages()
-                 getMessagesNotRead()
-               },
-               err => {
-                 console.log(' ERROR ON Change isRead to true :( ', err,status);
-               },
-             );
-           });
-         })
-         return true
+            tx.executeSql(
+              updateQuery,
+              [],
+              (x, result) => {
+                console.log(`Change isRead to ${status} Succfuly . ):`);
+                getAllMessages();
+                getMessagesNotRead();
+              },
+              err => {
+                console.log(' ERROR ON Change isRead to true :( ', err, status);
+              },
+            );
+          });
+        });
+        return true;
       } catch (error) {
-        return false
+        return false;
       }
-   }else{
-    return false
-   }
+    } else {
+      return false;
+    }
   };
 
   return (
@@ -540,12 +602,14 @@ const LocalDataBase = ({children}) => {
         saveContactsLive,
         // saveContactsNotReg,
         // getcontactsNotReg,
+        setMessagesNotRead,
         getcontactsLive,
         contactsLive,
         contactsNotReg,
         setcontactsLive,
         setcontactsNotReg,
         changeMessageStatus,
+        deleteMessagesByIds
       }}>
       {children}
     </DataBaseContext.Provider>

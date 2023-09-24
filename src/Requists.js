@@ -1,5 +1,6 @@
 // export const BACK_END_URL = "http://192.168.1.103:5001";
-// export const BACK_END_URL = "https://sendmebackend8080.adaptable.app";
+// export const BACK_END_URL_DB = "http://192.168.1.103:5001";
+export const BACK_END_URL_DB = "https://sendmebackend8080.adaptable.app";
 export const BACK_END_URL = "https://sendme-oyhw.onrender.com";
 import axios from "axios";
 import Toast from 'react-native-toast-message';
@@ -20,7 +21,7 @@ export const checkInternetConnection = async () => {
 
     export const signUp = (data) => { 
         const fun = new Promise((resolve,rej)=>{
-            axios.post(BACK_END_URL + "/auth/signUp",data).then((res)=>{
+            axios.post(BACK_END_URL_DB + "/auth/signUp",data).then((res)=>{
                 resolve(res)
             }).catch((err)=>{
                 if (err.message == "Network Error") {
@@ -41,7 +42,7 @@ export const checkInternetConnection = async () => {
 
     export const signIn = (data) => { 
     const fun = new Promise((resolve,rej)=>{
-    axios.post(BACK_END_URL + "/auth/login",data).then((res)=>{
+    axios.post(BACK_END_URL_DB + "/auth/login",data).then((res)=>{
         resolve(res)
     }).catch((err)=>{
         if (err.message == "Network Error") {
@@ -62,7 +63,7 @@ export const checkInternetConnection = async () => {
 
     export const logoutReq = (token,data) => { 
         const fun = new Promise((resolve,rej)=>{
-        axios.post(BACK_END_URL + "/auth/logout",{phoneNumber:data},{
+        axios.post(BACK_END_URL_DB + "/auth/logout",{phoneNumber:data},{
             headers: {
                 'auth_token_jwt': token ,
                 'Accept' : 'application/json',
@@ -89,7 +90,7 @@ export const checkInternetConnection = async () => {
 
     export const getMyContactsInSendMe = (token,data) => { 
         const fun = new Promise((resolve,rej)=>{
-            axios.post(BACK_END_URL + "/persons/all-users",{contact:data},{
+            axios.post(BACK_END_URL_DB + "/persons/all-users",{contact:data},{
                 headers: {
                     'auth_token_jwt': token ,
                     'Accept' : 'application/json',
@@ -116,7 +117,7 @@ export const checkInternetConnection = async () => {
 
      export const getandCreateChat = (data,token) => { 
         const fun = new Promise((resolve,rej)=>{
-            axios.post(BACK_END_URL + "/chat/getandCreateChat",data,{
+            axios.post(BACK_END_URL_DB + "/chat/getandCreateChat",data,{
                 headers: {
                     'auth_token_jwt': token ,
                     'Accept' : 'application/json',
@@ -143,7 +144,7 @@ export const checkInternetConnection = async () => {
 
      export const editProfile = (data,token) => { 
         const fun = new Promise((resolve,rej)=>{
-            axios.post(BACK_END_URL + "/auth/editProfile",data,{
+            axios.post(BACK_END_URL_DB + "/auth/editProfile",data,{
                 headers: {
                     'auth_token_jwt': token ,
                     'Accept' : 'application/json',
@@ -170,7 +171,7 @@ export const checkInternetConnection = async () => {
 
      export const deleteAccount = (data) => { 
         const fun = new Promise((resolve,rej)=>{
-            axios.post(BACK_END_URL + "/persons/deleteAccount",{id:data.id},{
+            axios.post(BACK_END_URL_DB + "/persons/deleteAccount",{id:data.id},{
                 headers: {
                     'auth_token_jwt': data.token ,
                     'Accept' : 'application/json',
@@ -197,7 +198,7 @@ export const checkInternetConnection = async () => {
 
      export const getUnReadMessages = (data) => { 
         const fun = new Promise((resolve,rej)=>{
-            axios.post(BACK_END_URL + "/chat/getUnReadMessages",{userId:data.id},{
+            axios.post(BACK_END_URL_DB + "/chat/getUnReadMessages",{userId:data.id},{
                 headers: {
                     'auth_token_jwt': data.token ,
                     'Accept' : 'application/json',
@@ -207,12 +208,12 @@ export const checkInternetConnection = async () => {
                 resolve(res)
             }).catch((err)=>{
                 if (err.message == "Network Error") {
-                    Toast.show({
-                        type: 'error',
-                        text1: 'غير متصل بلإنترنت',
-                        text2: 'تأكد من إتصالك بل إنترنت',
-                        visibilityTime:4000,
-                      });
+                    // Toast.show({
+                    //     type: 'error',
+                    //     text1: 'غير متصل بلإنترنت',
+                    //     text2: 'تأكد من إتصالك بل إنترنت',
+                    //     visibilityTime:4000,
+                    //   });
                    return rej({net:false,error:err.message})
                 }else{
                     return rej({net:true,error:err})

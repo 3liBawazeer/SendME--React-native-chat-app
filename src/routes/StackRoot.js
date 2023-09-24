@@ -28,7 +28,9 @@ const StackRoot = () => {
             <stack.Screen name='signUp'      component={SignUp} />
             <stack.Screen name='home'        component={Home} />
             {/* <stack.Screen name='search'      component={SearchScreen} /> */}
-            <stack.Screen name='chat'        component={ChatScreen} />
+            <stack.Screen name='chat'   options={{
+                presentation:"card"
+            }}  component={ChatScreen} />
             {/* <stack.Screen name='VideoCall'   component={VideoCall} /> */}
             <stack.Screen name='friendsList' component={FriendsList} />
             <stack.Screen name='SettingHome' component={SettingHome} />

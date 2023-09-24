@@ -13,12 +13,17 @@ import { AppState } from 'react-native';
 
 
 
-export const displayNotfee = async (data,navName) => { 
+export const displayNotfee = async (data,contact) => { 
+   console.log("dispaly notfee");
   await notifee.requestPermission()
   // console.log(data && data?.chat && AppState.currentState == "background","nofffffffffffffff");
     if (data && data?.chat && AppState.currentState == "background") {
       
     const sender = JSON.parse(data.sender)
+    const findContact = contact?.find((ele)=> ele?.userId == sender?.id);
+    if (findContact) {
+      sender.username = findContact?.username
+    }
 
     const nitfe = await notifee.getDisplayedNotifications()
     const displayNotifee = nitfe.find((ele)=>{
@@ -52,7 +57,7 @@ export const displayNotfee = async (data,navName) => {
         vibration:true,
         importance:  AndroidImportance.HIGH
     })
-   await notifee.displayNotification({
+    notifee.displayNotification({
         // title: `<p style="color: #333;"><b>${sender?.username}</span></p></b></p>`,
         data:{
           friendId:sender?.id || "",

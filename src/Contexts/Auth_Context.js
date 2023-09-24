@@ -37,7 +37,6 @@ const Auth_Context = ({children}) => {
             socketIo.disconnect()
             await AsyncStorage.removeItem("user");
             await AsyncStorage.removeItem("token");
-            nav();
          })
       }
 

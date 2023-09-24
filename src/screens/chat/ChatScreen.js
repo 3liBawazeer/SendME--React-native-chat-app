@@ -24,7 +24,15 @@ import {formatDate, GetDateLastMessages} from '../../components/getTimeAr';
 import {colors} from '../../assets/colors';
 import EmojiPicker, {EmojiKeyboard} from 'rn-emoji-keyboard';
 import {FlashList} from '@shopify/flash-list';
+import { chatBackHandler } from './chatBackHandler';
+import AlertDialog from '../../components/AlertDialog';
+import {useMessagesStatusChecker} from "../../hooks/useMessagesStatusChecker"
+import {removeMessagesRemoved,setMessagesRemoved} from "../../hooks/useMessagesRemovedOfflineChecker"
+const STATUSBAR_HEIGHT = StatusBar.currentHeight;
+
 const ChatScreen = ({route, navigation}) => {
+
+
   // const [animatedKeyEmojis] = useState(new Animated.Value(-300));
   // const [showEmoji, setshowEmoji] = useState(false);
   // const inputRef = useRef(null)
@@ -53,28 +61,35 @@ const ChatScreen = ({route, navigation}) => {
 
   // const keyboardHeight = useKeyboardHeight()
 
+
+  
+
   const {item, newfriendData, checkChat} = route?.params;
   const {OnlineUsers} = useSocket();
   const flatlistRef = useRef(null);
   const {MyPeer} = useCalling();
   const {
     AllMessages,
-    setAllMessages,
     saveMessage,
     getLastChats,
     saveLastChat,
-    checkIsRead,
     changeMessageStatus,
+    deleteMessagesByIds
   } = useLocalDataBase();
   const {userData, Token} = useAuth();
+
   const [ChatLoading, setChatLoading] = useState(false);
   const [chatId, setchatId] = useState(null);
   const [friendId, setfriendId] = useState(null);
   const [messages, setmessages] = useState([]);
-  const MessagesRef = useRef([]).current;
   const [mesgContent, setmesgContent] = useState('');
   const [freindData, setfreindData] = useState(null);
   const [OnceSaveCHat, setOnceSaveCHat] = useState(0);
+  const [showMDLDelMessages, setshowMDLDelMessages] = useState(false)
+  const [selecetedMessages, setselecetedMessages] = useState([])
+  const [isReciverSelctedMessage, setisReciverSelctedMessage] = useState(false)
+
+  const MessagesRef = useRef([]).current;
   const [showEmojiModel, setshowEmojiModel] = useState(false);
   const [emojis, setemojis] = useState('');
 
@@ -107,40 +122,42 @@ const ChatScreen = ({route, navigation}) => {
     const mesg = AllMessages.filter(item => item.chat == chatId);
      setmessages(mesg);
    }
-  },[chatId,friendId,AllMessages])
+  },[chatId,friendId])
 
-  useLayoutEffect(() => {
-    if (chatId && friendId) {
-      const mesg = AllMessages.filter(item => item.chat == chatId);
-      const messageNotRead = mesg.filter(ele => {
-        const sender =
-          ele?.isRead != '2' && JSON?.parse(ele?.sender)?.id != userData?._id;
-        return sender;
-      }).map(ele => ele?.id);
-      socketIo?.emit('sendChangeMessageStatus', {
-        messagesIds: messageNotRead,
-        status: '2',
-        toId: friendId,
-      },(res)=>{
-        if (res.isSent && messageNotRead.length != 0) {
-          changeMessageStatus(messageNotRead,"2").then(()=>{
-          setmessages((o)=>o.map((ele)=>{
-          const find = messageNotRead.find(e=> e == ele?.id)
-          if (find) {
-            return {...ele,isRead:"2"}
-          }else{
-            return ele
-          }
-        }))
-          })
-        }
-      });
+  useMessagesStatusChecker({friendId,chatId,AllMessages,userData,setmessages})
+
+  // useLayoutEffect(() => {
+  //   if (chatId && friendId) {
+  //     const mesg = AllMessages.filter(item => item.chat == chatId);
+  //     const messageNotRead = mesg.filter(ele => {
+  //       const sender =
+  //         ele?.isRead != '2' && JSON?.parse(ele?.sender)?.id != userData?._id;
+  //       return sender;
+  //     }).map(ele => ele?.id);
+  //     socketIo?.emit('sendChangeMessageStatus', {
+  //       messagesIds: messageNotRead,
+  //       status: '2',
+  //       toId: friendId,
+  //     },(res)=>{
+  //       if (res.isSent && messageNotRead.length != 0) {
+  //         changeMessageStatus(messageNotRead,"2").then(()=>{
+  //         setmessages((o)=>o.map((ele)=>{
+  //         const find = messageNotRead.find(e=> e == ele?.id)
+  //         if (find) {
+  //           return {...ele,isRead:"2"}
+  //         }else{
+  //           return ele
+  //         }
+  //       }))
+  //         })
+  //       }
+  //     });
       
-    }
-    return ()=>{
-      // socketIo?.off('sendChangeMessageStatus')
-    }
-  }, [chatId,friendId]);
+  //   }
+  //   return ()=>{
+  //     // socketIo?.off('sendChangeMessageStatus')
+  //   }
+  // }, [chatId,friendId,AllMessages]);
 
   useEffect(() => {
     if (chatId) {
@@ -181,7 +198,10 @@ const ChatScreen = ({route, navigation}) => {
       FCMtoken: userData?.FCMtoken || '',
     };
 
+    
+
     if (mesgContent !== '') {
+
       setmessages(o => [
         ...o,
         {
@@ -193,6 +213,41 @@ const ChatScreen = ({route, navigation}) => {
           isRead: '0',
         },
       ]);
+
+      socketIo.emit('sendNotifyNewMessage', [
+        friendId,
+        {
+          id: messageId,
+          content: mesgContent,
+          sender: JSON.stringify(SENDER),
+          chat: chatId,
+          timestamp: Date.now(),
+          isRead: '0',
+        },
+        userData?.FCMtoken,
+      ],()=>{
+        changeMessageStatus([messageId],"1")
+        setmessages(o=>o.map((ele)=>{
+          if (ele.id == messageId) {
+            return {...ele,isRead:"1"}
+          }else{
+            return ele
+          }
+        }))
+      });
+      socketIo.emit('sendNewMessage', [
+        friendId,
+        {
+          id: messageId,
+          content: mesgContent,
+          sender: JSON.stringify(SENDER),
+          chat: chatId,
+          timestamp: Date.now(),
+          isRead: '0',
+        },
+      ]);
+
+      
       saveMessage({
         id: messageId,
         content: mesgContent,
@@ -232,54 +287,68 @@ const ChatScreen = ({route, navigation}) => {
           console.log(err.message);
         });
 
-      socketIo.emit('sendNotifyNewMessage', [
-        friendId,
-        {
-          id: messageId,
-          content: mesgContent,
-          sender: JSON.stringify(SENDER),
-          chat: chatId,
-          timestamp: Date.now(),
-          isRead: '0',
-        },
-        userData?.FCMtoken,
-      ],()=>{
-        changeMessageStatus([messageId],"1")
-        setmessages(o=>o.map((ele)=>{
-          if (ele.id == messageId) {
-            return {...ele,isRead:"1"}
-          }else{
-            return ele
-          }
-        }))
-      });
-      socketIo.emit('sendNewMessage', [
-        friendId,
-        {
-          id: messageId,
-          content: mesgContent,
-          sender: JSON.stringify(SENDER),
-          chat: chatId,
-          timestamp: Date.now(),
-          isRead: '0',
-        },
-        {
-          senderToken: userData?.FCMtoken,
-          reciverToken: freindData?.FCMtoken,
-        },
-      ]);
+      // socketIo.emit('sendNotifyNewMessage', [
+      //   friendId,
+      //   {
+      //     id: messageId,
+      //     content: mesgContent,
+      //     sender: JSON.stringify(SENDER),
+      //     chat: chatId,
+      //     timestamp: Date.now(),
+      //     isRead: '0',
+      //   },
+      //   userData?.FCMtoken,
+      // ],()=>{
+      //   // changeMessageStatus([messageId],"1")
+      //   setmessages(o=>o.map((ele)=>{
+      //     if (ele.id == messageId) {
+      //       return {...ele,isRead:"1"}
+      //     }else{
+      //       return ele
+      //     }
+      //   }))
+      // });
+      // socketIo.emit('sendNewMessage', [
+      //   friendId,
+      //   {
+      //     id: messageId,
+      //     content: mesgContent,
+      //     sender: JSON.stringify(SENDER),
+      //     chat: chatId,
+      //     timestamp: Date.now(),
+      //     isRead: '0',
+      //   },
+      //   {
+      //     senderToken: userData?.FCMtoken,
+      //     reciverToken: freindData?.FCMtoken,
+      //   },
+      // ]);
       setmesgContent('');
     }
   };
 
-
+  const delMessages = (all) => { 
+    const arr = messages.filter((e)=> !selecetedMessages.find((im)=>im.id == item.id) )
+    setmessages((o)=> arr )
+    const messagesRemoved = selecetedMessages.map((ele)=>ele.id);
+     if (all) {
+       deleteMessagesByIds(messagesRemoved).then(()=>{
+        setMessagesRemoved(friendId,{messagesIds:messagesRemoved,toId:friendId})
+        socketIo?.emit("delMessages",{messagesIds:messagesRemoved,toId:friendId},() => {
+          removeMessagesRemoved(friendId)
+        });
+      })
+     }else{
+      deleteMessagesByIds(messagesRemoved)
+     }
+  }
  
-  const STATUSBAR_HEIGHT = StatusBar.currentHeight;
+  
 
   useEffect(() => {
     notifee.cancelDisplayedNotifications();
     socketIo.on('reciveNewMessage', data => {
-      // setmessages(o=>[...o,{...data,isRead:"2"}])
+      setmessages(o=>[...o,{...data,isRead:"2"}])
     });
 
     socketIo.on("reciveChangeMessageStatus",(data)=>{
@@ -299,50 +368,12 @@ const ChatScreen = ({route, navigation}) => {
     };
   }, []);
 
-  useEffect(() => {
-    const unsub = setTimeout(() => {
-      if (chatId && friendId) {
-        const mesg = AllMessages.filter(item => item.chat == chatId);
-        const messageNotRead = mesg.filter(ele => {
-          const sender =
-            ele?.isRead != '2' && JSON?.parse(ele?.sender)?.id != userData?._id;
-          return sender;
-        }).map(ele => ele?.id);
-        socketIo?.emit('sendChangeMessageStatus', {
-          messagesIds: messageNotRead,
-          status: '2',
-          toId: friendId,
-        },(res)=>{
-          if (res.isSent) {
-            changeMessageStatus(messageNotRead,"2").then(()=>{
-            setmessages((o)=>o.map((ele)=>{
-            const find = messageNotRead.find(e=> e == ele?.id)
-            if (find) {
-              return {...ele,isRead:"2"}
-            }else{
-              return ele
-            }
-          }))
-            })
-          }
-        });
-        
-      }
-    }, 100);
-    return () => clearTimeout(unsub);
-  }, [AllMessages]);
 
+  chatBackHandler(selecetedMessages,setselecetedMessages)
   return (
     <>
-      <View
-        // source={require('./../../assets/images/wallpaper.png')}
-        // imageStyle={{
-        //   opacity: 0.5,
-        //   width: '100%',
-        //   height: '100%',
-        //   tintColor: '#0B1A90',
-        // }}
-        style={{flex: 1, backgroundColor: colors.light}}>
+      <View style={{flex: 1, backgroundColor: colors.white}} >
+
         <LinearGradient
           colors={[colors.primary, colors.primary]}
           start={{x: 0, y: 2}}
@@ -420,16 +451,16 @@ const ChatScreen = ({route, navigation}) => {
           <View style={{flexDirection: 'row', marginHorizontal: 5}}>
             {/* <Icon size={20} name='video-camera' type="font-awesome"  color={"#fff"} onPress={()=>{}} style={{padding:8,}} />
           <Icon size={20} name='phone' type="entypo" color={"#fff"} onPress={()=>{}} style={{padding:8,}} /> */}
-            {/* <Icon
+            {selecetedMessages?.length >= 1 && <Icon
               size={20}
-              name="dots-vertical"
+              name="delete"
               type="material-community"
               color={'#fff'}
               onPress={() => {
-                console.log(freindData);
+                setshowMDLDelMessages(true)
               }}
               style={{padding: 8}}
-            /> */}
+            />}
           </View>
         </LinearGradient>
 
@@ -437,14 +468,14 @@ const ChatScreen = ({route, navigation}) => {
           data={[...messages].reverse()}
           ref={flatlistRef}
           inverted
-          estimatedItemSize={200}
+          estimatedItemSize={150}
           showsVerticalScrollIndicator={false}
           renderToHardwareTextureAndroid
           keyExtractor={(_, x) => x.toString()}
           ListFooterComponent={
             <View
               style={{
-                backgroundColor: '#fff',
+                backgroundColor: colors.light,
                 margin: 20,
                 padding: 10,
                 alignItems: 'center',
@@ -466,12 +497,26 @@ const ChatScreen = ({route, navigation}) => {
           }
           renderItem={({item, index}) => {
             const compar = JSON.parse(item.sender).id !== userData?._id;
+            // const isSelcted = selecetedMessages?.find((ele)=> ele == item.id) || false
             return (
               <TouchableOpacity
                 onPress={() => {
-                  console.log(+JSON.parse(item.isRead));
+                  console.log(item);
+                  if (selecetedMessages?.length >= 1) {
+                    (selecetedMessages?.find((e)=> e.id == item.id))
+                    ? setselecetedMessages(o=>o.filter((e)=> e.id != item.id))
+                    :  setselecetedMessages(o=>[...o,item])
+                  }
                 }}
-                style={{}}>
+                onLongPress={()=>{
+                  (selecetedMessages?.find((e)=> e.id == item.id))
+                    ? setselecetedMessages(o=>o.filter((e)=>e.id != item.id))
+                    :  setselecetedMessages(o=>[...o,item])
+                }}
+                style={{
+                  backgroundColor: selecetedMessages.find((im)=>im.id == item.id) ? "#eef" : "#0000",
+                  marginVertical:1
+                }}>
                 {
                   <GetDateLastMessages
                     messages={[...messages]}
@@ -483,14 +528,14 @@ const ChatScreen = ({route, navigation}) => {
                 <View
                   style={{
                     flexDirection: compar ? 'row' : 'row-reverse',
-                    alignItems: 'center',
+                    // alignItems: 'center',
                     
                   }}>
                   <LinearGradient
                     colors={
                       !compar
-                        ? [colors.primary, colors.primary]
-                        : [colors.white, colors.white]
+                        ? [colors.light, colors.light]
+                        : [colors.light, colors.light]
                     }
                     start={{x: 0, y: 0}}
                     end={{x: 1, y: 0}}
@@ -512,22 +557,24 @@ const ChatScreen = ({route, navigation}) => {
                       alignItems: 'center',
                       justifyContent: 'center',
                       maxWidth: '85%',
-                      borderBottomWidth:compar ? 2 : 0,
+                      borderBottomWidth:2,
                       borderLeftWidth:compar ? 2 : 0,
-                      borderColor:colors.secondry
+                      borderRightWidth:!compar ? 2 : 0,
+                      borderColor:compar ?colors.secondry:colors.primary
                     }}>
                     <Text
                       style={{
-                        color: !compar ? colors.light : colors.secondry,
+                        color: !compar ? colors.primary : colors.secondry,
                         fontSize: 15,
                         fontWeight: '600',
                         textAlignVertical: 'center',
+                        paddingVertical:5
                       }}>
                       {item.content}
                     </Text>
                   </LinearGradient>
                   <View
-                    style={{height:"100%",paddingVertical:10,alignItems:"center",justifyContent:'flex-end'}}>
+                    style={{paddingVertical:10,alignItems:"center",justifyContent:'flex-end',}}>
                     { !compar &&
                     <Icon
                       name={
@@ -583,13 +630,16 @@ const ChatScreen = ({route, navigation}) => {
               <Input
                 placeholder="اكتب ..."
                 bg={'#fff'}
-                bw={0}
+                bw={1}
+                bc={mesgContent != ""?colors.primary:colors.secondry}
+                mh={5}
                 e={0}
                 shc="#08d"
-                br={10}
-                ph={20}
+                br={50}
+                ph={15}
                 // multH={100}
                 mult
+                fc={colors.typograf}
                 icn2="send"
                 ict2="font-awesome"
                 icc2="#08d"
@@ -691,6 +741,27 @@ const ChatScreen = ({route, navigation}) => {
             </View>
           </View>
         )}
+
+
+        {/* models */}
+
+        <AlertDialog 
+        data={{
+          title:`حذف ${selecetedMessages.length} رسالة ؟`,
+          body:"هل تود حذف الرسائل المحدده؟",
+          visible:showMDLDelMessages,
+
+        }} btns={{
+          acceptBtnTitle:"حذف عندي",
+          rejectBtnTitle:"حذف عند الكل ",
+          acceptBtnPress:()=>{delMessages(false);setshowMDLDelMessages(false);setselecetedMessages([])},
+          rejectBtnPress:()=>{delMessages(true);setshowMDLDelMessages(false);setselecetedMessages([])},
+        }}
+        setState={setshowMDLDelMessages}
+        showBtnReject={!!!selecetedMessages.find((ele)=> JSON.parse(ele?.sender).id !== userData?._id)}
+        />
+
+
       </View>
     </>
   );
@@ -704,13 +775,10 @@ const styles = StyleSheet.create({
     marginTop: 0,
     flexDirection: 'row-reverse',
     alignItems: 'flex-end',
-    // borderTopEndRadius: 10,
-    // borderTopStartRadius: 10,
     padding: 5,
     backgroundColor: '#fff',
-    margin: 10,
+    margin: 5,
     borderRadius: 25,
-    // borderWidth:2,
     borderColor: colors.secondry,
   },
 });

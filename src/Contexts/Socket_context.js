@@ -13,6 +13,7 @@ import notifee, {AndroidImportance, EventType} from '@notifee/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import NetInfo from '@react-native-community/netinfo';
+import { useMessagesSendOfflineChecker } from '../hooks/useMessagesSendOfflineChecker';
 const socketContext = createContext();
 
 const Socket_context = ({children}) => {
@@ -21,14 +22,14 @@ const Socket_context = ({children}) => {
   const {userData} = useAuth();
   const {
     LastChats,
-    setLastChats,
+    deleteMessagesByIds,
     saveMessage, 
     getLastChats, 
     saveLastChat, 
     getMessagesNotRead,
     changeMessageStatus,
-    AllMessages,
-    setAllMessages,
+    contactsLive,
+    MessagesNotRead
   } = useLocalDataBase();
   const [netConnection, setnetConnection] = useState({
     isConnected: false,
@@ -37,7 +38,7 @@ const Socket_context = ({children}) => {
   const [OnlineUsers, setOnlineUsers] = useState([]);
   const [checkMessages, setcheckMessages] = useState(true)
 
-
+// socket connected
   useEffect(() => {
     if (userData != null && userData?._id) {
       socketIo = socket(BACK_END_URL, {query: {userId: userData._id}})
@@ -53,31 +54,45 @@ const Socket_context = ({children}) => {
     };
   }, [userData,netConnection]);
 
+
+
+  // this is for get messagesStatus and MessagesRemoved from [ DB ]
   useEffect(() => {
-         setcheckMessages(()=>true)
-      if (!netConnection.isConnected) {
-        setcheckMessages(false)
-      }else{
-       
-        socketIo?.emit('getMessagesStatus_Requist', {userId: userData?._id});
-        socketIo?.emit("getOnlineUsers","")
-      }
-      socketIo?.on('getMessagesStatus_Responsive', data => {
-        if (data?.length != 0) {
-          let arr = []
-          data.map((ele)=>{
-            arr.push(...ele.messagesIds)
-          });
-          console.log(arr);
-          changeMessageStatus(arr,"2")
+      if (userData?._id) {
+        setcheckMessages(()=>true)
+        if (!netConnection.isConnected) {
+          setcheckMessages(false)
+        }else{
+         
+          socketIo?.emit('getMessagesStatus_Requist', {userId: userData?._id});
+          socketIo?.emit('getMessagesRemoved_Requist', {userId: userData?._id});
+          socketIo?.emit("getOnlineUsers","")
+
         }
-        setcheckMessages(false)
-      });
-      return () =>{
-        socketIo?.off('getUnReadMessages_Requist');
-        socketIo?.off('getUnReadMessages_Responsive');
-        socketIo?.off('getOnlineUsers');
-        setcheckMessages(false)
+        socketIo?.on('getMessagesStatus_Responsive', data => {
+          if (data?.length != 0) {
+            let arr = []
+            data.map((ele)=>{
+              arr.push(...ele.messagesIds)
+            });
+            console.log(arr);
+            changeMessageStatus(arr,"2")
+          }
+          setcheckMessages(false)
+        });
+        socketIo?.on('getMessagesRemoved_Responsive', data => {
+          if (data?.length != 0) {
+            deleteMessagesByIds(data)
+          }
+          setcheckMessages(false)
+        });
+        return () =>{
+          socketIo?.off('getUnReadMessages_Requist');
+          socketIo?.off('getUnReadMessages_Responsive');
+          socketIo?.off('getMessagesRemoved_Responsive')
+          socketIo?.off('getOnlineUsers');
+          setcheckMessages(false)
+        }
       }
   }, [netConnection,userData?._id])
   
@@ -86,21 +101,11 @@ const Socket_context = ({children}) => {
     socketIo?.on('reciveNotifyNewMessage', (data) => {
       const findChat = LastChats.find(item => item.chat == data.chat);
       reciveMessagesfun(data,!!findChat)
-      // socketIo?.emit('sendChangeMessageStatus', {
-      //   messagesIds: [data.id],
-      //   status: '1',
-      //   toId: JSON.parse(data?.sender)?.id,
-      // },(res) => {
-      //   if (res.isSent) {
-      //     changeMessageStatus([data.id],"1")
-      //   }
-      // });
     });
     socketIo?.on('onlineUsers', data => {
       setOnlineUsers(data);
     });
 
-   
 
     return () => {
       socketIo?.off('reciveNotifyNewMessage');
@@ -111,6 +116,10 @@ const Socket_context = ({children}) => {
   }, [socketIo]);
 
   useEffect(() => {
+    socketIo?.on("reciveMessagesDeleted",(data)=>{
+      console.log("reciveMessagesDeleted 🫢 : ",data);
+      deleteMessagesByIds(data)
+    })
     socketIo?.on("reciveChangeMessageStatus",(data)=>{
       changeMessageStatus([...data.messagesIds],data.status).then(()=>{
         // setAllMessages((o)=>o.map((ele)=>{
@@ -141,7 +150,6 @@ const Socket_context = ({children}) => {
       }
     });
     const unsubscribe = NetInfo.addEventListener(state => {
-      // console.log("STATE", state );
       setnetConnection(o => ({...o, isConnected: state.isConnected}));
     });
 
@@ -151,7 +159,7 @@ const Socket_context = ({children}) => {
     };
   }, []);
 
-
+useMessagesSendOfflineChecker({netConnection,setcheckMessages,LastChats,MessagesNotRead});
 
   const sendMessage = async (input, ids) => {
     let user = await AsyncStorage.getItem('user');
@@ -225,10 +233,8 @@ const Socket_context = ({children}) => {
 
   const reciveMessagesfun = (data,newChat) => {
 
-    const findOne = LastChats.find(item => item.chat == data.chat);
-    // console.log(!!findOne,"this params true if we want toadd new chat");
-
-    displayNotfee(data);
+    displayNotfee(data,contactsLive);
+    
     saveMessage({
       id: data.id,
       content: data.content,
@@ -238,36 +244,23 @@ const Socket_context = ({children}) => {
       isRead: data.isRead,
     })
       .then(suc => {
-        if (!findOne && newChat) {
-          const frind = {
-            friendData: JSON.parse(data.sender),
-            chat: data.chat,
-          }
-          saveLastChat(frind).then(()=>{
-
-          }).cach((err)=>{
-            console.log("error on save last chat",err);
+        
+        getLastChats()
+          .then(async last => {
+            const findOne = last.find(item => item.chat == data.chat);
+            if (findOne || !newChat) {
+              console.log('LAST CHAT FOUND : ',findOne);
+            } else {
+              console.log('LAST CHAT Not FOUND : ',findOne);
+             await saveLastChat({
+                friendData: JSON.parse(data.sender),
+                chat: data.chat,
+              })
+                .then(o => {})
+                .cach(err => console.log(err));
+            }
           })
-        } else {
-           
-        }
-
-
-        // getLastChats()
-        //   .then(last => {
-        //     const findOne = last.find(item => item.chat == data.chat);
-        //     if (findOne) {
-        //       // console.log('LAST CHAT FOUND :)');
-        //     } else {
-        //       saveLastChat({
-        //         friendData: JSON.parse(data.sender),
-        //         chat: data.chat,
-        //       })
-        //         .then(o => {})
-        //         .cach(err => console.log(err));
-        //     }
-        //   })
-        //   .catch(err => {console.log(err)});
+          .catch(err => {console.log(err)});
       })
       .catch(err => {
         console.log(err);

@@ -29,7 +29,7 @@ import { colors } from '../../assets/colors';
 
 const FriendsList = ({navigation}) => {
 
-  const {contactsLive, contactsNotReg,saveContactsLive,saveContactsNotReg} = useLocalDataBase();
+  const {contactsLive, setcontactsLive,saveContactsLive,saveContactsNotReg} = useLocalDataBase();
 
   let animationRef = useRef(null);
   
@@ -49,9 +49,11 @@ const FriendsList = ({navigation}) => {
        }
 
     permid().then(()=>{
-      if (contactsLive.length == 0) {
+      if (contactsLive.length <= 0) {
+        console.log("get Contact requist",contactsLive.length);
         getContact()
       }else{
+        console.log("get Contact setState");
         setcontactsSendMe(contactsLive)
       }
     })
@@ -126,7 +128,7 @@ const FriendsList = ({navigation}) => {
 
               getMyContactsInSendMe(Token,numbers).then((data)=>{
                 const users = data.data.res.users;
-                // console.log(data.data.res,"dddddddddddddddddd");
+                
                 saveContactsLive(users).then((res)=>{
                   setloadingContacts(false);
                   // console.log("save contacts succ");
