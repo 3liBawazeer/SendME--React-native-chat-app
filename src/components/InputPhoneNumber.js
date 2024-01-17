@@ -3,6 +3,7 @@ import React ,{ useState} from 'react'
 import CountryPicker from 'react-native-country-picker-modal'
 import { TextInput } from 'react-native-gesture-handler'
 import { Icon } from '@rneui/themed'
+import { colors } from '../assets/colors'
 
 const InputPhoneNumber = ({
     codeStyle,
@@ -11,7 +12,9 @@ const InputPhoneNumber = ({
     placeholder="أدخل رقم جوالك",
     containerStyle,
     onFocus,
-    onContentSizeChange
+    onContentSizeChange,
+    onSubmitEditing,
+    editable
 }) => {
 
 
@@ -47,7 +50,10 @@ const InputPhoneNumber = ({
         <TextInput
         onFocus={onFocus}
          placeholder={placeholder}
+         editable={editable}
+         onSubmitEditing={onSubmitEditing}
          keyboardType="phone-pad"
+         style={{color:colors.typograf}}
          value={Number}
          onChangeText={(t)=>{
             setNumber(t)

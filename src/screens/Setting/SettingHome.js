@@ -29,9 +29,8 @@ const SettingHome = ({navigation}) => {
 const [showAlertDeleteAccount, setshowAlertDeleteAccount] = useState(false)
   const logOut = async () => {
     await RemoveAllData()
-    await logout().then( async () => {
+    logout().then(  () => {
       setlogoutLoading(false);
-     
       (navigation.replace('phone'));
     });
   };
@@ -141,7 +140,7 @@ const [showAlertDeleteAccount, setshowAlertDeleteAccount] = useState(false)
   ];
 
   const editProfile = async () => {
-    setloading(true);
+    
     setuploadLoading(true);
     try {
       // save image in firebase storage
@@ -165,12 +164,12 @@ const [showAlertDeleteAccount, setshowAlertDeleteAccount] = useState(false)
             navigation.replace('home');
           })
           .catch(err => {
-            setloading(false);
+            
             setuploadLoading(false);
             console.log(err.response);
           });
       }
-      setloading(false);
+      
       setuploadLoading(false);
     } catch (error) {
       setuploadLoading(false);

@@ -93,7 +93,7 @@ const PhoneVerifcation = ({navigation}) => {
     setloading(true);
 
     try {
-      const numbers = [];
+      const numbers = ["713263323"];
       if (!numbers.includes(phoneNumber)) {
         const Confirmation = await auth().signInWithPhoneNumber(countryKey + phoneNumber);
         if (Confirmation) {
@@ -101,8 +101,8 @@ const PhoneVerifcation = ({navigation}) => {
           setloading(false);
         }
       }else{
-        // const fcmToken = await messageing().getToken();
-        signUp({phoneNumber,countryKey,FCMtoken:""})
+        const fcmToken = await messageing().getToken();
+        signUp({phoneNumber,countryKey,FCMtoken:fcmToken})
           .then(data => {
             if (data.data.res.new == 'true') {
               setverLoading(false);
@@ -120,7 +120,7 @@ const PhoneVerifcation = ({navigation}) => {
               });
             }else{
               setverLoading(false);
-              Alert.alert('خطأ', ' تأكد من إتصالك بالشبكة ');
+              Alert.alert('خطأ', ' تأكد من إتصالك بالشبكة  📶 ');
             }
           }).catch((error)=>{
             
@@ -135,8 +135,11 @@ const PhoneVerifcation = ({navigation}) => {
                   case '[auth/network-request-failed]':
                     Alert.alert('خطأ', 'تأكد من إتصالك بالشبكة ');
                     break;
+                    case '[auth/network-request-failed]':
+                      Alert.alert('خطأ', 'تأكد من إتصالك بالشبكة ');
+                      break;
                   default:
-                    console.log(error.message);
+                    console.log(err,"//////");
                     break;
                 }
                 setloading(false);
@@ -163,8 +166,11 @@ const PhoneVerifcation = ({navigation}) => {
         case '[auth/network-request-failed]':
           Alert.alert('خطأ', 'تأكد من إتصالك بالشبكة ');
           break;
+        case '[auth/unknown]':
+          Alert.alert(' خطأ',"لايمكن تسجيل الدخول في الوقت الحالي الرجاء المحاوله لاحقاً");
+          break;
         default:
-          console.log(error.message);
+          console.log(err,"^_^");
           break;
       }
       setloading(false);
@@ -291,6 +297,8 @@ const PhoneVerifcation = ({navigation}) => {
               <View style={styles.body}>
                 <View style={{alignItems: 'center'}}>
                   <InputPhoneNumber
+                    editable={!loading}
+                    onSubmitEditing={checkSignIn}
                     onContentSizeChanged={() => {
                       // console.log('ddfocus    s ss  s s');
                       console.log(scrollViewRef.current.scrollToEnd);
@@ -312,6 +320,9 @@ const PhoneVerifcation = ({navigation}) => {
                   <TouchableOpacity
                     style={{elevation: 0, backgroundColor: '#fff'}}
                     onPress={() => {
+                      if (loading) {
+                        return
+                      }
                       checkSignIn();
                     }}>
                     <LinearGradient
@@ -320,7 +331,7 @@ const PhoneVerifcation = ({navigation}) => {
                       end={{x: 0, y: 0}}
                       style={styles.btn}>
                       {loading ? (
-                        <ActivityIndicator size={24} color={'#fff'} />
+                        <ActivityIndicator size={24} color={colors.light}  />
                       ) : (
                         <>
                           <Text style={styles.text}>التالي</Text>

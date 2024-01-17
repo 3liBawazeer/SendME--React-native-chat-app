@@ -7,8 +7,9 @@ import {
   Keyboard,
   Animated,
   Easing,
+  FlatList,
 } from 'react-native';
-import React, {useEffect, useState, useRef, useLayoutEffect} from 'react';
+import React, {useEffect, useState, useRef, useLayoutEffect, useCallback} from 'react';
 import uuid from 'react-native-uuid';
 import {useAuth} from '../../Contexts/Auth_Context';
 import {getandCreateChat} from '../../Requists';
@@ -28,6 +29,7 @@ import { chatBackHandler } from './chatBackHandler';
 import AlertDialog from '../../components/AlertDialog';
 import {useMessagesStatusChecker} from "../../hooks/useMessagesStatusChecker"
 import {removeMessagesRemoved,setMessagesRemoved} from "../../hooks/useMessagesRemovedOfflineChecker"
+import InputChat from './InputChat';
 const STATUSBAR_HEIGHT = StatusBar.currentHeight;
 
 const ChatScreen = ({route, navigation}) => {
@@ -122,7 +124,7 @@ const ChatScreen = ({route, navigation}) => {
     const mesg = AllMessages.filter(item => item.chat == chatId);
      setmessages(mesg);
    }
-  },[chatId,friendId])
+  },[chatId,friendId,])
 
   useMessagesStatusChecker({friendId,chatId,AllMessages,userData,setmessages})
 
@@ -197,8 +199,6 @@ const ChatScreen = ({route, navigation}) => {
       phoneNumber: userData?.phoneNumber,
       FCMtoken: userData?.FCMtoken || '',
     };
-
-    
 
     if (mesgContent !== '') {
 
@@ -287,49 +287,14 @@ const ChatScreen = ({route, navigation}) => {
           console.log(err.message);
         });
 
-      // socketIo.emit('sendNotifyNewMessage', [
-      //   friendId,
-      //   {
-      //     id: messageId,
-      //     content: mesgContent,
-      //     sender: JSON.stringify(SENDER),
-      //     chat: chatId,
-      //     timestamp: Date.now(),
-      //     isRead: '0',
-      //   },
-      //   userData?.FCMtoken,
-      // ],()=>{
-      //   // changeMessageStatus([messageId],"1")
-      //   setmessages(o=>o.map((ele)=>{
-      //     if (ele.id == messageId) {
-      //       return {...ele,isRead:"1"}
-      //     }else{
-      //       return ele
-      //     }
-      //   }))
-      // });
-      // socketIo.emit('sendNewMessage', [
-      //   friendId,
-      //   {
-      //     id: messageId,
-      //     content: mesgContent,
-      //     sender: JSON.stringify(SENDER),
-      //     chat: chatId,
-      //     timestamp: Date.now(),
-      //     isRead: '0',
-      //   },
-      //   {
-      //     senderToken: userData?.FCMtoken,
-      //     reciverToken: freindData?.FCMtoken,
-      //   },
-      // ]);
       setmesgContent('');
-    }
+    };
+
   };
 
-  const delMessages = (all) => { 
-    const arr = messages.filter((e)=> !selecetedMessages.find((im)=>im.id == item.id) )
-    setmessages((o)=> arr )
+  const delMessages = useCallback((all) => { 
+    // const arr = messages
+    setmessages((o)=> o.filter((e)=> !selecetedMessages.find((im)=>im.id == e.id) ) )
     const messagesRemoved = selecetedMessages.map((ele)=>ele.id);
      if (all) {
        deleteMessagesByIds(messagesRemoved).then(()=>{
@@ -337,18 +302,33 @@ const ChatScreen = ({route, navigation}) => {
         socketIo?.emit("delMessages",{messagesIds:messagesRemoved,toId:friendId},() => {
           removeMessagesRemoved(friendId)
         });
+        // socketIo?.emit("delMessagesInChat",{messagesIds:messagesRemoved,toId:friendId},() => {
+        //   removeMessagesRemoved(friendId)
+        // });
       })
      }else{
       deleteMessagesByIds(messagesRemoved)
      }
-  }
- 
+  },[messages,selecetedMessages])
   
 
   useEffect(() => {
     notifee.cancelDisplayedNotifications();
     socketIo.on('reciveNewMessage', data => {
       setmessages(o=>[...o,{...data,isRead:"2"}])
+    });
+
+    socketIo.on("reciveMessagesDeleted",(data)=>{
+      setmessages(o => o.filter((ele)=>{
+          const find = data.find(e=> e == ele?.id)
+          if (find) {
+            return false
+          }else{
+            return true
+          }
+         })
+      );
+      console.log(data,"this message deleted");
     });
 
     socketIo.on("reciveChangeMessageStatus",(data)=>{
@@ -361,12 +341,113 @@ const ChatScreen = ({route, navigation}) => {
           }
         }))
     })
+
     return () => {
       setmessages([]);
       socketIo?.off("reciveNewMessage");
+      // socketIo?.off("reciveMessagesDeleted");
       // socketIo?.off("reciveChangeMessageStatus");
     };
   }, []);
+
+
+  const renderMessage = useCallback(({item, index}) => {
+    const compar = JSON.parse(item.sender).id !== userData?._id;
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          console.log(item);
+          if (selecetedMessages?.length >= 1) {
+            (selecetedMessages?.find((e)=> e.id == item.id))
+            ? setselecetedMessages(o=>o.filter((e)=> e.id != item.id))
+            :  setselecetedMessages(o=>[...o,item])
+          }
+        }}
+        onLongPress={()=>{
+          (selecetedMessages?.find((e)=> e.id == item.id))
+            ? setselecetedMessages(o=>o.filter((e)=>e.id != item.id))
+            :  setselecetedMessages(o=>[...o,item])
+        }}
+        style={{
+          
+          marginVertical:1
+        }}>
+        {
+          <GetDateLastMessages
+            messages={[...messages]}
+            date={+JSON.parse(item.timestamp)}
+            item={item}
+            index={index}
+          />
+        }
+        <View
+          style={{
+            flexDirection: compar ? 'row' : 'row-reverse',
+            zIndex:10,
+           backgroundColor: selecetedMessages.find((im)=>im.id == item.id) ? colors.light : "#0000",
+          }}>
+          <View
+            style={{
+              alignSelf: compar ? 'flex-start' : 'flex-end',
+              marginVertical: 5,
+              borderRadius:15,
+              margin: 5,
+              backgroundColor:colors.white,
+              padding: 10,
+              paddingHorizontal: 15,
+              alignItems: 'center',
+              justifyContent: 'center',
+              maxWidth: '85%',
+              borderWidth:2,
+              borderColor:compar ?colors.secondry:colors.primary,
+              elevation:6,
+              zIndex:55,
+              shadowColor:compar ?colors.secondry:colors.primary,
+            }}>
+            <Text
+              style={{
+                color: !compar ? colors.typograf : colors.typograf,
+                fontSize: 15,
+                fontWeight: '600',
+                textAlignVertical: 'center',
+                // paddingVertical:5
+              }}>
+              {item.content}
+            </Text>
+          </View>
+          <View
+            style={{paddingVertical:10,alignItems:"center",justifyContent:'flex-end',}}>
+            { !compar &&
+            <Icon
+              name={
+                item?.isRead == '2'
+                  ? 'checkmark-done'
+                  : item.isRead == '1'
+                  ? 'checkmark'
+                  : 'time-outline'
+              }
+              type="ionicon"
+              color={true ? colors.primary : colors.secondry}
+              size={15}
+            />}
+            <Text
+              style={{
+                color: compar ? colors.primary : colors.secondry,
+                fontSize: 12,
+                textAlign: 'left',
+                padding: 1,
+                marginHorizontal: 10,
+                fontWeight: 'bold',
+              }}>
+              {formatDate(+JSON.parse(item.timestamp))}
+              {}
+            </Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  },[selecetedMessages,messages]);
+  
 
 
   chatBackHandler(selecetedMessages,setselecetedMessages)
@@ -464,14 +545,15 @@ const ChatScreen = ({route, navigation}) => {
           </View>
         </LinearGradient>
 
-        <FlashList
+        <FlatList
           data={[...messages].reverse()}
           ref={flatlistRef}
           inverted
-          estimatedItemSize={150}
+          initialNumToRender={20}
+          // estimatedItemSize={150}
           showsVerticalScrollIndicator={false}
           renderToHardwareTextureAndroid
-          keyExtractor={(_, x) => x.toString()}
+          keyExtractor={useCallback((x)=>x?.id.toString() + x.content,[])}
           ListFooterComponent={
             <View
               style={{
@@ -495,202 +577,12 @@ const ChatScreen = ({route, navigation}) => {
               </Text>
             </View>
           }
-          renderItem={({item, index}) => {
-            const compar = JSON.parse(item.sender).id !== userData?._id;
-            // const isSelcted = selecetedMessages?.find((ele)=> ele == item.id) || false
-            return (
-              <TouchableOpacity
-                onPress={() => {
-                  console.log(item);
-                  if (selecetedMessages?.length >= 1) {
-                    (selecetedMessages?.find((e)=> e.id == item.id))
-                    ? setselecetedMessages(o=>o.filter((e)=> e.id != item.id))
-                    :  setselecetedMessages(o=>[...o,item])
-                  }
-                }}
-                onLongPress={()=>{
-                  (selecetedMessages?.find((e)=> e.id == item.id))
-                    ? setselecetedMessages(o=>o.filter((e)=>e.id != item.id))
-                    :  setselecetedMessages(o=>[...o,item])
-                }}
-                style={{
-                  backgroundColor: selecetedMessages.find((im)=>im.id == item.id) ? "#eef" : "#0000",
-                  marginVertical:1
-                }}>
-                {
-                  <GetDateLastMessages
-                    messages={[...messages]}
-                    date={+JSON.parse(item.timestamp)}
-                    item={item}
-                    index={index}
-                  />
-                }
-                <View
-                  style={{
-                    flexDirection: compar ? 'row' : 'row-reverse',
-                    // alignItems: 'center',
-                    
-                  }}>
-                  <LinearGradient
-                    colors={
-                      !compar
-                        ? [colors.light, colors.light]
-                        : [colors.light, colors.light]
-                    }
-                    start={{x: 0, y: 0}}
-                    end={{x: 1, y: 0}}
-                    
-                    style={{
-                      alignSelf: compar ? 'flex-start' : 'flex-end',
-                      // paddingTop: 5,
-                      marginVertical: 5,
-                      borderTopRightRadius: compar ? 0 : 15,
-                      borderBottomRightRadius: compar ? 15 : 15,
-                      borderTopLeftRadius: compar ? 15 : 0,
-                      borderBottomLeftRadius: compar ? 15 : 15,
-                      margin: 5,
-                      // marginLeft: compar ? 5 : 50,
-                      // marginRight: compar ? 50 : 5,
-                      // elevation: 10,
-                      padding: 10,
-                      paddingHorizontal: 15,
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      maxWidth: '85%',
-                      borderBottomWidth:2,
-                      borderLeftWidth:compar ? 2 : 0,
-                      borderRightWidth:!compar ? 2 : 0,
-                      borderColor:compar ?colors.secondry:colors.primary
-                    }}>
-                    <Text
-                      style={{
-                        color: !compar ? colors.primary : colors.secondry,
-                        fontSize: 15,
-                        fontWeight: '600',
-                        textAlignVertical: 'center',
-                        paddingVertical:5
-                      }}>
-                      {item.content}
-                    </Text>
-                  </LinearGradient>
-                  <View
-                    style={{paddingVertical:10,alignItems:"center",justifyContent:'flex-end',}}>
-                    { !compar &&
-                    <Icon
-                      name={
-                        item?.isRead == '2'
-                          ? 'checkmark-done'
-                          : item.isRead == '1'
-                          ? 'checkmark'
-                          : 'time-outline'
-                      }
-                      type="ionicon"
-                      color={true ? colors.primary : colors.secondry}
-                      size={15}
-                    />}
-                    <Text
-                      style={{
-                        color: compar ? colors.primary : colors.secondry,
-                        fontSize: 12,
-                        textAlign: 'left',
-                        padding: 1,
-                        marginHorizontal: 10,
-                        fontWeight: 'bold',
-                      }}>
-                      {formatDate(+JSON.parse(item.timestamp))}
-                      {}
-                    </Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            );
-          }}
+          renderItem={renderMessage}
         />
 
-        <View>
-          {/* <Text>{}</Text> */}
-          <View style={styles.inpt}>
-            <View
-              style={{
-                alignItems: 'center',
-                justifyContent: 'center',
-                paddingEnd: 5,
-              }}>
-              {/* <Icon
-                name={"emoji-happy"}
-                type="entypo"
-                color={colors.secondry}
-                containerStyle={{borderRadius:50,overflow:"hidden"}}
-                underlayColor={colors.secondry}
-                style={{padding:5,}}
-                
-              /> */}
-            </View>
-            <View style={{flex: 2}}>
-              <Input
-                placeholder="اكتب ..."
-                bg={'#fff'}
-                bw={1}
-                bc={mesgContent != ""?colors.primary:colors.secondry}
-                mh={5}
-                e={0}
-                shc="#08d"
-                br={50}
-                ph={15}
-                // multH={100}
-                mult
-                fc={colors.typograf}
-                icn2="send"
-                ict2="font-awesome"
-                icc2="#08d"
-                value={mesgContent}
-                // focusAndBlur={!emojis}
-                onChangeText={t => setmesgContent(t)}
-              />
-            </View>
+        <InputChat setmesgContent={setmesgContent}  sendMessage={sendMessage} />
 
-            <View
-              style={{
-                alignItems: 'center',
-                justifyContent: 'center',
-                overflow: 'hidden',
-                backgroundColor:
-                  mesgContent != '' ? colors.primary : colors.secondry,
-                borderRadius: 50,
-                height:50,
-                // flex:1
-              }}>
-              <Icon
-                name="send"
-                type="font-awesome"
-                containerStyle={{borderRadius: 500}}
-                underlayColor={colors.light}
-                style={{
-                  // paddingHorizontal:15,
 
-                  padding: 15,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-                disabled={mesgContent == ''}
-                disabledStyle={{backgroundColor: '#0000'}}
-                color={colors.light}
-                size={20}
-                onPress={() => {
-                  sendMessage();
-                }}
-              />
-            </View>
-          </View>
-
-          {/* <EmojiPicker
-          allowMultipleSelections
-          enableSearchBar={false}
-           
-           onEmojiSelected={(e)=>{
-            // console.log(e.emoji);
-          }} open={showEmojiModel} onClose={() => setshowEmojiModel(false)} /> */}
-        </View>
         {/* <Animated.View style={{height:300,marginBottom:animatedKeyEmojis,}} >
           <View style={{backgroundColor:"#fff",paddingVertical:5,flexDirection:"row",paddingHorizontal:20}} >
             <Icon name='delete' type='feather' color={colors.secondry} size={30} onPress={()=>{

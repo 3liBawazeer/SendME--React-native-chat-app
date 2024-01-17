@@ -1,15 +1,16 @@
 import React, {useState, useEffect} from 'react';
-import {StyleSheet,Image, View,Text} from 'react-native';
+import {StyleSheet,Image, View,Text, PermissionsAndroid, Platform} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import {useAuth} from '../Contexts/Auth_Context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useLocalDataBase} from '../Contexts/LocalDataBase';
 import { colors } from '../assets/colors';
-
+import { getMyContactsInSendMe } from '../Requists';
+import Contacts from 'react-native-contacts';
 const SPLASHSCREEN = ({navigation}) => {
   
-  const {isLoggedIn, userData, Token, setUserData, setToken} = useAuth();
-  const {checkChatsAndMessages} = useLocalDataBase();
+  const {Token, setUserData, setToken} = useAuth();
+  const {checkChatsAndMessages,contactsLive,saveContactsLive} = useLocalDataBase();
   const [CheckLoggedIn, setCheckLoggedIn] = useState(false);
 
 
@@ -26,7 +27,8 @@ const SPLASHSCREEN = ({navigation}) => {
   };
 
   useEffect(() => {
-    if (checkChatsAndMessages >= 3 && !CheckLoggedIn  ) {
+    console.log(checkChatsAndMessages,"ddddddddddddd");
+    if (checkChatsAndMessages >= 4 && !CheckLoggedIn  ) {
       setCheckLoggedIn(true);
       checkUser();
     }
@@ -34,6 +36,82 @@ const SPLASHSCREEN = ({navigation}) => {
       
     }
   }, [checkChatsAndMessages]);
+
+
+
+  // permmison get contact
+//   useEffect(() => {
+//     const permid = async () => { 
+//       await PermissionsAndroid.request(
+//         PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
+//         {
+//           title: 'Contacts',
+//           message: 'This app would like to view your contacts.',
+//           buttonPositive: 'Please accept bare mortal',
+//         },
+//       ).catch((err)=>{
+//          throw Error(err)
+//       })
+//      }
+
+//   permid().then(()=>{
+//     if (contactsLive.length <= 0) {
+//       console.log("get Contact requist",contactsLive.length);
+//       getContact()
+//     }else{
+//       console.log("get Contact setState");
+//     }
+//   })
+  
+//   return ()=>{
+
+//   }
+// }, []);
+
+
+// const getContact = async () => {
+//   if (Platform.OS === 'ios') {
+   
+//   } else if (Platform.OS === 'android') {
+
+    
+//       Contacts.getAll()
+//         .then(contacts => {
+
+//           // this is your contacts in your phone | {displayName: "name",phoneNumber:"11110000"}
+//           const numbers = contacts.map((item)=>{
+//             if (item && item.phoneNumbers.length > 0) {
+//               const after = item?.phoneNumbers[0]?.number?.replace(/\-|\)|\(|\s/gi,'');
+//               return {displayName:item.displayName, phoneNumber: after};
+//             }
+//           }).filter((i)=>i);
+//           // here we check and get all contact that has a send me acount
+//           if (Token) {
+
+//             getMyContactsInSendMe(Token,numbers).then((data)=>{
+//               const users = data.data.res.users;
+              
+//               saveContactsLive(users).then((res)=>{
+//                 // console.log("save contacts succ");
+//               }).catch((err)=>{
+//                 console.log(err,"\n from saveContactsLive ");
+//               })
+//             })
+//             .catch((err)=>{
+//               console.log(err)
+//             })
+
+//           }
+
+//         })
+//         .catch(e => {
+//           console.log(e);
+//           // Alert.alert('خطأ', ' تأكد من إتصالك بالشبكة ');
+//         });
+    
+//   }
+// };
+
 
   return (<>
     <View style={styles.body}>

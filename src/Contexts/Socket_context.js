@@ -100,7 +100,7 @@ const Socket_context = ({children}) => {
   useEffect(() => {
     socketIo?.on('reciveNotifyNewMessage', (data) => {
       const findChat = LastChats.find(item => item.chat == data.chat);
-      reciveMessagesfun(data,!!findChat)
+      reciveMessagesfun(data, !!!findChat)
     });
     socketIo?.on('onlineUsers', data => {
       setOnlineUsers(data);
@@ -117,7 +117,7 @@ const Socket_context = ({children}) => {
 
   useEffect(() => {
     socketIo?.on("reciveMessagesDeleted",(data)=>{
-      console.log("reciveMessagesDeleted 🫢 : ",data);
+      // console.log("reciveMessagesDeleted 🫢 : ",data);
       deleteMessagesByIds(data)
     })
     socketIo?.on("reciveChangeMessageStatus",(data)=>{
@@ -249,7 +249,7 @@ useMessagesSendOfflineChecker({netConnection,setcheckMessages,LastChats,Messages
           .then(async last => {
             const findOne = last.find(item => item.chat == data.chat);
             if (findOne || !newChat) {
-              console.log('LAST CHAT FOUND : ',findOne);
+              console.log('LAST CHAT FOUND : ',findOne || !newChat);
             } else {
               console.log('LAST CHAT Not FOUND : ',findOne);
              await saveLastChat({

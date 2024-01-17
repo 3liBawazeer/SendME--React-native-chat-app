@@ -1,7 +1,7 @@
-// export const BACK_END_URL = "http://192.168.1.103:5001";
-// export const BACK_END_URL_DB = "http://192.168.1.103:5001";
-export const BACK_END_URL_DB = "https://sendmebackend8080.adaptable.app";
-export const BACK_END_URL = "https://sendme-oyhw.onrender.com";
+export const BACK_END_URL = "http://192.168.43.240:5001";
+export const BACK_END_URL_DB = "http://192.168.43.240:5001";
+// export const BACK_END_URL_DB = "https://sendmebackend8080.adaptable.app";
+// export const BACK_END_URL = "https://sendme-oyhw.onrender.com";
 import axios from "axios";
 import Toast from 'react-native-toast-message';
 import NetInfo from '@react-native-community/netinfo';

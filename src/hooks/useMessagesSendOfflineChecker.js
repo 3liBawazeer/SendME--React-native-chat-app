@@ -9,15 +9,22 @@ import { useAuth } from "../Contexts/Auth_Context";
 // useMessagesSendOfflineChecker({netConnection,LastChats,MessagesNotRead});
 export const useMessagesSendOfflineChecker = (props) => { 
 
-    const {netConnection,LastChats,MessagesNotRead} = props
-    const { changeMessageStatus } = useLocalDataBase();
+    const {netConnection,LastChats} = props
+    const { changeMessageStatus,getMessagesNotRead,MessagesNotRead } = useLocalDataBase();
     const {userData} = useAuth();
     
     // This is for Check Messages not send 🎈
     useEffect(()=>{
-        const messagesNotSend = MessagesNotRead.filter((msg)=>{
-            return ((JSON.parse(msg?.sender)?.id == userData?._id) && (msg?.isRead == "0"))
-        });
+       if (userData) {
+     
+      //  getMessagesNotRead().then((data)=>{
+      //   // console.log(data,"3333333333333333333333");
+       
+      //  })
+      const messagesNotSend = MessagesNotRead.filter((msg)=>{
+        return ((JSON.parse(msg?.sender)?.id == userData?._id) && (msg?.isRead == "0"))
+    });
+
 
         if (messagesNotSend.length != 0) {
            messagesNotSend.map((ele)=>{
@@ -47,7 +54,8 @@ export const useMessagesSendOfflineChecker = (props) => {
               ]);
            })
         }
-    },[netConnection])
+       }
+    },[netConnection,userData])
 
 
 

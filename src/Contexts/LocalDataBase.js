@@ -370,31 +370,40 @@ const LocalDataBase = ({children}) => {
   };
 
   const getMessagesNotRead = () => {
-    db.transaction(tx => {
-      tx.executeSql(
-        `SELECT * FROM Messages WHERE isRead = 0 OR isRead = 1`,
-        [],
-        (x, result) => {
-          let len = result.rows.length;
-          if (len > 0) {
-            let mesg = [];
-            for (let i = 0; i < len; i++) {
-              mesg.push(result.rows.item(i));
+    const promis = new Promise((resolve,reject)=>{
+      db.transaction(tx => {
+        tx.executeSql(
+          `SELECT * FROM Messages WHERE isRead = 0 OR isRead = 1`,
+          [],
+          (x, result) => {
+            let len = result.rows.length;
+            if (len > 0) {
+              let mesg = [];
+              for (let i = 0; i < len; i++) {
+                mesg.push(result.rows.item(i));
+              }
+              setMessagesNotRead(mesg);
+              setcheckChatsAndMessages(o => o + 1);
+              resolve(mesg)
+            } else {
+              setMessagesNotRead([]);
+              setcheckChatsAndMessages(o => o + 1);
+              resolve([])
+              // console.log(
+              //   'Messages not read            is not found',
+              //   '|/*************************',
+              // );
             }
-            setMessagesNotRead(mesg);
-          } else {
-            setMessagesNotRead([]);
-            // console.log(
-            //   'Messages not read            is not found',
-            //   '|/*************************',
-            // );
-          }
-        },
-        err => {
-          console.log(' ERROR ON GET MESSAGESNOT READ :( ', err.message);
-        },
-      );
-    });
+          },
+          err => {
+            setcheckChatsAndMessages(o => o + 1);
+            reject(err)
+            console.log(' ERROR ON GET MESSAGESNOT READ :( ', err.message);
+          },
+        );
+      });
+    })
+    return promis
   };
 
   const getcontactsLive = () => {
